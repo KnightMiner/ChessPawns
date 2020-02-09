@@ -18,10 +18,10 @@ function mod:init()
     },
     {
       Name = "chess_knight",
-      Default =           { PosX = -20, PosY = -12 },
-      Animated =          { PosX = -20, PosY = -12, NumFrames = 5 },
+      Default =           { PosX = -20, PosY = -15 },
+      Animated =          { PosX = -20, PosY = -15, NumFrames = 5 },
       Submerged =         { PosX = -20, PosY =  -6 },
-      Broken =            { PosX = -20, PosY = -12 },
+      Broken =            { PosX = -20, PosY = -15 },
       SubmergedBroken =   { PosX = -20, PosY =  -6 },
       Icon =              {},
     },
