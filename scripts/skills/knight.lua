@@ -7,9 +7,10 @@ local cutils = require(mod.scriptPath .. "libs/CUtils")
 
   @param point       Point targeting
   @param isAttack    If true, we are attacking so pawns and holes can be targeted
+  @param isUpgraded  If true, we have less self damage and can do a little more damage
   @return  True if the point is valid
 ]]
-local function pointValid(point, isAttack)
+local function pointValid(point, isAttack, isUpgraded)
 	-- invalid points immediately fail
 	if not Board:IsValid(point) then
 		return false
@@ -37,8 +38,16 @@ local function pointValid(point, isAttack)
 		return false
 	end
 
-	-- max damage is the pawns max heallth, taking armor into account
-	return pawnAtPoint:GetHealth() + (pawnAtPoint:IsArmor() and 1 or 0) <= cutils.GetMaxHealth(Pawn) + (Pawn:IsArmor() and 1 or 0)
+	-- max damage is the pawns max heallth, taking armor and the lower self damage upgrades into account
+	local maxDamage = cutils.GetMaxHealth(Pawn) + (Pawn:IsArmor() and 1 or 0) + (isUpgraded and 1 or 0)
+	-- target is lowered by acid and raised by armor
+	local targetHealth = pawnAtPoint:GetHealth()
+	if pawnAtPoint:IsAcid() then
+		targetHealth = math.ceil(targetHealth / 2)
+	elseif pawnAtPoint:IsArmor() then
+		targetHealth = targetHealth + 1
+	end
+	return maxDamage >= targetHealth
 end
 
 --[[--
@@ -68,20 +77,20 @@ function Chess_Knight_Move:GetTargetArea(p1)
 			-- direction of this movement
 			local offset = DIR_VECTORS[dir] * 2 + DIR_VECTORS[(dir + d) % 4]
 			local point = p1 + offset
-			if pointValid(point, self.IsAttack) then
+			if pointValid(point, self.IsAttack, self.LessSelfDamage) then
 				ret:push_back(point)
 
 				-- second knight leap
 				-- note IsAttack is never true after here
 				if move >= 4 then
 					point = point + offset
-					if pointValid(point, false) then
+					if pointValid(point, false, false) then
 						ret:push_back(point)
 
 						--  third leap
 						if move >= 6 then
 							point = point + offset
-							if pointValid(point, false) then
+							if pointValid(point, false, false) then
 								ret:push_back(point)
 							end
 						end
@@ -96,13 +105,13 @@ function Chess_Knight_Move:GetTargetArea(p1)
 			-- direction of movement
 			local offset = DIR_VECTORS[dir] * 3
 			local point = p1 + offset
-			if pointValid(point, false) then
+			if pointValid(point, false, false) then
 				ret:push_back(point)
 
 				-- double threeleaper
 				if move >= 5 then
 					point = point + offset
-					if pointValid(point, false) then
+					if pointValid(point, false, false) then
 						ret:push_back(point)
 					end
 				end
@@ -236,9 +245,14 @@ function Chess_Knight_Smite:GetSkillEffect(p1, p2)
 	if target ~= nil and target:GetSpace() ~= Pawn:GetSpace() then
 		-- deal damage based on targets health
 		local selfDamage = target:GetHealth()
-		if target:IsArmor() then
+		-- acid means less self damage, they squash easier
+		if target:IsAcid() then
+			selfDamage = math.ceil(selfDamage / 2)
+		-- armor means more
+		elseif target:IsArmor() then
 			selfDamage = selfDamage + 1
 		end
+		-- less self drops it again
 		if self.LessSelfDamage then
 			selfDamage = math.max(selfDamage - 1)
 		end
