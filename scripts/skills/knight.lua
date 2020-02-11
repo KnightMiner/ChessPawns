@@ -31,6 +31,12 @@ local function pointValid(point, isAttack, isUpgraded)
 		return false
 	end
 
+	-- skip remaining logic in tooltips to save some effort
+	-- plus, some code later crashes in modloader 2.4.0, so prevents a crash
+	if helpers.isTooltip() then
+		return true
+	end
+
 	-- no attacking shielded enemies, that takes 2 hits
 	-- no attacking other mechs, we need an empty space after the attack (note friendly units are targetable)
 	-- TODO: double check that the dam is not targetable, check behavior with other units like terraformer
@@ -246,11 +252,14 @@ function Chess_Knight_Smite:GetSkillEffect(p1, p2)
 		-- deal damage based on targets health
 		local selfDamage = target:GetHealth()
 		-- acid means less self damage, they squash easier
-		if target:IsAcid() then
-			selfDamage = math.ceil(selfDamage / 2)
-		-- armor means more
-		elseif target:IsArmor() then
-			selfDamage = selfDamage + 1
+		-- skip in tooltips, as the modloader 2.4.0 has a bug where this crashes
+		if not helpers.isTooltip() then
+			if target:IsAcid() then
+				selfDamage = math.ceil(selfDamage / 2)
+			-- armor means more
+			elseif target:IsArmor() then
+				selfDamage = selfDamage + 1
+			end
 		end
 		-- less self drops it again
 		if self.LessSelfDamage then
