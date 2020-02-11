@@ -1,7 +1,7 @@
 local mod = {
 	id = "Knight_Chess",
 	name = "Chess Pawns",
-	version = "0.0.1",
+	version = "0.0.2",
 	requirements = {},
 }
 
