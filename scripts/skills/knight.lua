@@ -68,7 +68,7 @@ local function pointValid(point, isAttack, isUpgraded)
 	elseif isArmorSafe(pawnAtPoint) then
 		targetHealth = targetHealth + 1
 	end
-	
+
 	return maxDamage >= targetHealth
 end
 
@@ -297,8 +297,8 @@ function Chess_Knight_Smite:GetSkillEffect(p1, p2)
 
 		-- count the pod as a target, killing it and dealing 1 self damage. just to be mean
 		if Board:IsPod(p2) then
-			Board:DamageSpace(SpaceDamage(p2, 1))
-			Board:DamageSpace(helpers.animationDamage(p2, "ExploAir1"))
+			ret:AddDamage(SpaceDamage(p2, 1))
+			ret:AddDamage(helpers.animationDamage(p2, "ExploAir1"))
 		end
 	end
 
