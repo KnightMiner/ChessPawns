@@ -199,7 +199,11 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
   local newPos = target - dirVec
   local moved = p1 ~= newPos
   if moved then
-    ret:AddCharge(Board:GetSimplePath(p1, newPos), NO_DELAY)
+    -- charging onto a pod should not save it
+    if doDamage and Board:IsPod(newPos) then
+      ret:AddScript("Chess_Castle_Charge:ScriptDamage("..newPos:GetString()..",1)")
+    end
+    ret:AddCharge(Board:GetSimplePath(p1, newPos), p1:Manhattan(newPos) * 0.1)
   end
 
   -- deal damage if required
@@ -218,7 +222,9 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
     toss:push_back(landing)
 
     -- fake punch for animation, then toss the unit
-    ret:AddMelee(newPos, SpaceDamage(target, 0))
+    if not moved then
+      ret:AddMelee(newPos, SpaceDamage(target, 0))
+    end
     ret:AddLeap(toss, FULL_DELAY)
     -- add damage where the target used to be. Used for damage for the weapon preview
     -- if we add damage to the new position, it may show as targeting the attacking mech
@@ -227,7 +233,7 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
 
     -- add damage using a script, so it does not show in preview
     ret:AddScript("Chess_Castle_Charge:ScriptDamage("..landing:GetString()..","..self.Damage..")")
-  	ret:AddBounce(landing, 3)
+    ret:AddBounce(landing, 3)
   end
 
   return ret
