@@ -1,3 +1,6 @@
+local mod = mod_loader.mods[modApi.currentMod]
+local trait = require(mod.scriptPath.."libs/trait")
+
 ----Mechs----
 
 --[[--
@@ -125,7 +128,13 @@ Chess_Pawn_AB_Black = Chess_Pawn_AB:new { ImageOffset = 4 }
 AddPawnName("Chess_Pawn_AB")
 AddPawnName("Chess_Pawn_AB_Black")
 
--- TODO: trait icon
+-- Pawn explosions --
+trait:Add{
+	PawnTypes = { "Chess_Pawn_B", "Chess_Pawn_AB", "Chess_Pawn_B_Black", "Chess_Pawn_AB_Black" },
+	Icon = { "img/combat/icons/icon_explode.png", Point(0,8) },
+	Description = {"Explosive Upgrade", "This unit will always explode on death, dealing 2 damage to adjacent tiles."}
+}
+
 -- TODO: reconsider smoke
 -- chess pawn B explodes on death
 function Chess_Pawn_B:GetDeathEffect(p1)

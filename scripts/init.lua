@@ -6,6 +6,8 @@ local mod = {
 }
 
 function mod:init()
+	self.modApiExt = require(self.scriptPath .."modApiExt/modApiExt")
+	self.modApiExt:init()
 	local sprites = require(self.scriptPath .. "libs/sprites")
   sprites.addMechs(
     {
@@ -57,6 +59,8 @@ function mod:init()
 end
 
 function mod:load(options,version)
+	self.modApiExt:load(self, options, version)
+	local sprites = require(self.scriptPath .. "libs/trait"):load()
 	modApi:addSquad({"Chess Pawns","Chess_Knight","Chess_Rook","Chess_King"},"Chess Pawns","Chess piece themed mechs.",self.resourcePath.."/icon.png")
 end
 
