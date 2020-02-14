@@ -3,6 +3,21 @@ local helpers = require(mod.scriptPath .. "libs/helpers")
 local cutils = require(mod.scriptPath .. "libs/CUtils")
 
 --[[--
+  Used to safely get the armor status of a pawn.
+	Works around a bug in ModLoader 2.4.0 where the mech tester returns invalid region data for armor.
+
+  @param pawn       Pawn of interest
+  @return  True if the pawn is armored
+]]
+local function isArmorSafe(pawn)
+	if IsTestMechScenario() then
+		return _G[pawn:GetType()]:GetArmor()
+	end
+
+	return pawn:IsArmor()
+end
+
+--[[--
   Determines if a point is valid for knight movement or attack
 
   @param point       Point targeting
@@ -45,14 +60,15 @@ local function pointValid(point, isAttack, isUpgraded)
 	end
 
 	-- max damage is the pawns max heallth, taking armor and the lower self damage upgrades into account
-	local maxDamage = cutils.GetMaxHealth(Pawn) + (Pawn:IsArmor() and 1 or 0) + (isUpgraded and 1 or 0)
+	local maxDamage = cutils.GetMaxHealth(Pawn) + (isArmorSafe(Pawn) and 1 or 0) + (isUpgraded and 1 or 0)
 	-- target is lowered by acid and raised by armor
 	local targetHealth = pawnAtPoint:GetHealth()
 	if pawnAtPoint:IsAcid() then
 		targetHealth = math.ceil(targetHealth / 2)
-	elseif pawnAtPoint:IsArmor() then
+	elseif isArmorSafe(pawnAtPoint) then
 		targetHealth = targetHealth + 1
 	end
+	
 	return maxDamage >= targetHealth
 end
 
@@ -257,7 +273,7 @@ function Chess_Knight_Smite:GetSkillEffect(p1, p2)
 			if target:IsAcid() then
 				selfDamage = math.ceil(selfDamage / 2)
 			-- armor means more
-			elseif target:IsArmor() then
+			elseif isArmorSafe(target) then
 				selfDamage = selfDamage + 1
 			end
 		end
