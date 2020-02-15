@@ -50,16 +50,35 @@ function mod:init()
 	sprites.addSprite("chess_shotup_pawn_yellow", "effects")
 	sprites.addSprite("chess_shotup_pawn_black",  "effects")
 
-	modApi:addWeapon_Texts(require(self.scriptPath.."weapon_texts"))
+	local texts = require(self.scriptPath.."weapon_texts")
+	modApi:addWeapon_Texts(texts)
 	require(self.scriptPath.."skills/king")
 	require(self.scriptPath.."skills/knight")
 	require(self.scriptPath.."skills/rook")
 	require(self.scriptPath.."skills/pawn")
 	require(self.scriptPath.."pawns")
+
+	self.shop = require(self.scriptPath .."libs/shop")
+	self.shop:addWeapon({
+		id = "Chess_Knight_Smite",
+		name = texts.Chess_Knight_Smite_Name,
+		desc = "Adds Knight Smite to the store."
+	})
+	self.shop:addWeapon({
+		id = "Chess_Castle_Charge",
+		name = texts.Chess_Castle_Charge_Name,
+		desc = "Adds Castle Charge to the store."
+	})
+	self.shop:addWeapon({
+		id = "Chess_SpawnPawn",
+		name = texts.Chess_Knight_Smite_Name,
+		desc = "Adds Spawn Pawn to the store."
+	})
 end
 
 function mod:load(options,version)
 	self.modApiExt:load(self, options, version)
+	self.shop:load(options)
 	local sprites = require(self.scriptPath .. "libs/trait"):load()
 	modApi:addSquad({"Chess Pawns","Chess_Knight","Chess_Rook","Chess_King"},"Chess Pawns","Chess piece themed mechs.",self.resourcePath.."/icon.png")
 end
