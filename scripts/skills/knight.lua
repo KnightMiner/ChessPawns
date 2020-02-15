@@ -53,9 +53,8 @@ local function pointValid(point, isAttack, isUpgraded)
 	end
 
 	-- no attacking shielded enemies, that takes 2 hits
-	-- no attacking other mechs, we need an empty space after the attack (note friendly units are targetable)
-	-- TODO: double check that the dam is not targetable, check behavior with other units like terraformer
-	if pawnAtPoint:IsShield() or Board:IsPawnTeam(point, TEAM_MECH) then
+	-- no attacking pawns with a corpse (false for mechs oddly, so check that too)
+	if pawnAtPoint:IsShield() or pawnAtPoint:IsMech() or _G[pawnAtPoint:GetType()]:GetCorpse() then
 		return false
 	end
 
