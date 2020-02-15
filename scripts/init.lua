@@ -3,6 +3,7 @@ local mod = {
 	name = "Chess Pawns",
 	version = "0.0.2",
 	requirements = {},
+	icon = "img/icon.png",
 }
 
 function mod:init()
@@ -80,7 +81,12 @@ function mod:load(options,version)
 	self.modApiExt:load(self, options, version)
 	self.shop:load(options)
 	local sprites = require(self.scriptPath .. "libs/trait"):load()
-	modApi:addSquad({"Chess Pawns","Chess_Knight","Chess_Rook","Chess_King"},"Chess Pawns","Chess piece themed mechs.",self.resourcePath.."/icon.png")
+	modApi:addSquad(
+		{ "Chess Pawns", "Chess_Knight", "Chess_Rook", "Chess_King" },
+		"Chess Pawns",
+		"Chess piece themed mechs.",
+		self.resourcePath.."img/icon.png"
+	)
 end
 
 return mod

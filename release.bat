@@ -6,7 +6,6 @@ MKDIR build
 MKDIR build\ChessPawns
 
 REM Copy required files into build directory
-COPY /V icon.png build\ChessPawns\icon.png
 XCOPY img build\ChessPawns\img /s /e /i
 XCOPY scripts build\ChessPawns\scripts /s /e /i
 
