@@ -78,8 +78,8 @@ function mod:init()
 		desc = "Adds Castle Charge to the store."
 	})
 	self.shop:addWeapon({
-		id = "Chess_SpawnPawn",
-		name = texts.Chess_Knight_Smite_Name,
+		id = "Chess_Spawn_Pawn",
+		name = texts.Chess_Spawn_Pawn_Name,
 		desc = "Adds Spawn Pawn to the store."
 	})
 end

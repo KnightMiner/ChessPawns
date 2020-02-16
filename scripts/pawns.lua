@@ -73,7 +73,7 @@ Chess_King = Pawn:new {
 	MoveSpeed = 1,
 	Flying = true,
 	-- skills
-	SkillList = { "Chess_SpawnPawn" },
+	SkillList = { "Chess_Spawn_Pawn" },
 	MoveSkill = Chess_King_Move,
 	-- display
 	Image = "chess_king",
@@ -97,7 +97,7 @@ Chess_Pawn = Pawn:new {
 	Health = 1,
 	MoveSpeed = 2,
 	-- skills
-	SkillList = { "Chess_PawnSpear" },
+	SkillList = { "Chess_Pawn_Spear" },
 	MoveSkill = Chess_Pawn_Move,
 	-- display
 	Image = "chess_pawn",
@@ -111,7 +111,7 @@ AddPawnName("Chess_Pawn")
 AddPawnName("Chess_Pawn_Alt")
 
 --- Pawns for Spawn Pawn Upgrade 1 - Spear range is upgraded, allowing 2 tiles to be reachable
-Chess_Pawn_A     = Chess_Pawn:new   { SkillList = { "Chess_PawnSpear_A" } }
+Chess_Pawn_A     = Chess_Pawn:new   { SkillList = { "Chess_Pawn_Spear_A" } }
 Chess_Pawn_A_Alt = Chess_Pawn_A:new { Image = "chess_pawn_alt" }
 AddPawnName("Chess_Pawn_A")
 AddPawnName("Chess_Pawn_A_Alt")
@@ -123,7 +123,7 @@ AddPawnName("Chess_Pawn_B")
 AddPawnName("Chess_Pawn_B_Alt")
 
 --- Pawns for combined upgrades
-Chess_Pawn_AB     = Chess_Pawn_B:new  { SkillList = { "Chess_PawnSpear_A" } }
+Chess_Pawn_AB     = Chess_Pawn_B:new  { SkillList = { "Chess_Pawn_Spear_A" } }
 Chess_Pawn_AB_Alt = Chess_Pawn_AB:new { Image = "chess_pawn_alt" }
 AddPawnName("Chess_Pawn_AB")
 AddPawnName("Chess_Pawn_AB_Alt")

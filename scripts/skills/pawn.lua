@@ -16,7 +16,7 @@ end
 
   Upgrade: Increases range by 1
 ]]
-Chess_PawnSpear = Prime_Spear:new{
+Chess_Pawn_Spear = Prime_Spear:new{
 	Class        = "Unique",
 	Range        = 1,
 	PathSize     = 1,
@@ -34,8 +34,7 @@ Chess_PawnSpear = Prime_Spear:new{
 	}
 }
 
--- TODO: verify tooltip
-Chess_PawnSpear_A = Chess_PawnSpear:new {
+Chess_Pawn_Spear_A = Chess_Pawn_Spear:new {
   Range = 2,
   PathSize = 2,
 	TipImage     = {

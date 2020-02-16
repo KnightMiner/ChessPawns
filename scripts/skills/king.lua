@@ -70,7 +70,7 @@ end
 
 	Upgrades: Alternate distance and diagonal
 ]]
-Chess_SpawnPawn = Deployable:new {
+Chess_Spawn_Pawn = Deployable:new {
 	-- base stats
 	Class       = "Ranged",
 	Limited     = 0,
@@ -98,7 +98,7 @@ Chess_SpawnPawn = Deployable:new {
 }
 
 -- Range
-Chess_SpawnPawn_A = Chess_SpawnPawn:new {
+Chess_Spawn_Pawn_A = Chess_Spawn_Pawn:new {
 	Deployed    = "Chess_Pawn_A",
 	DeployedAlt = "Chess_Pawn_A_Alt",
 	TipImage = {
@@ -111,7 +111,7 @@ Chess_SpawnPawn_A = Chess_SpawnPawn:new {
 }
 
 -- Explosion
-Chess_SpawnPawn_B = Chess_SpawnPawn:new {
+Chess_Spawn_Pawn_B = Chess_Spawn_Pawn:new {
 	Deployed    = "Chess_Pawn_B",
 	DeployedAlt = "Chess_Pawn_B_Alt",
 	TipImage = {
@@ -125,7 +125,7 @@ Chess_SpawnPawn_B = Chess_SpawnPawn:new {
 }
 
 -- Both
-Chess_SpawnPawn_AB = Chess_SpawnPawn:new {
+Chess_Spawn_Pawn_AB = Chess_Spawn_Pawn:new {
 	Deployed    = "Chess_Pawn_AB",
 	DeployedAlt = "Chess_Pawn_AB_Alt"
 }
@@ -186,7 +186,7 @@ local function getColor(pawnId)
 	return color or DEFAULT_COLOR
 end
 
-function Chess_SpawnPawn:GetSkillEffect(p1, target)
+function Chess_Spawn_Pawn:GetSkillEffect(p1, target)
 	local ret = SkillEffect()
 
 	-- skip running in the tooltip world as there is no proper region, plus only one pawn
