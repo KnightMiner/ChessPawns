@@ -85,13 +85,17 @@ function mod:init()
 end
 
 function mod:load(options,version)
+	-- load libraries
 	self.modApiExt:load(self, options, version)
 	self.shop:load(options)
-	local sprites = require(self.scriptPath .. "libs/trait"):load()
+	require(self.scriptPath .. "libs/trait"):load()
+	require(self.scriptPath .. "weaponPreview/api"):load()
+
+	-- add mech squad
 	modApi:addSquad(
 		{ "Chess Pawns", "Chess_Knight", "Chess_Rook", "Chess_King" },
 		"Chess Pawns",
-		"Chess piece themed mechs.",
+		"These mech employ unusual weapons and unique movement patterns.",
 		self.resourcePath.."img/icon.png"
 	)
 end

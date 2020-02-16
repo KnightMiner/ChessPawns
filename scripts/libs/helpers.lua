@@ -144,19 +144,4 @@ function helpers.getTargetLine(start, speed, extra)
 	return points
 end
 
---[[--
-  Damages the board without creating fire
-
-  @param  point   Point for the damage
-  @param  amount  Damage to deal
-  @return SpaceDamage instance
-]]
-function helpers.safeDamage(point, amount)
-  local damage = SpaceDamage(point, amount)
-	if not Board:IsFire(point) then
-		damage.iFire = EFFECT_REMOVE
-	end
-	return damage
-end
-
 return helpers

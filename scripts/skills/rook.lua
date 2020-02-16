@@ -1,5 +1,6 @@
-local mod = mod_loader.mods[modApi.currentMod]
-local helpers = require(mod.scriptPath .. "libs/helpers")
+local path = mod_loader.mods[modApi.currentMod].scriptPath
+local helpers = require(path .. "libs/helpers")
+local previewer = require(path .. "weaponPreview/api")
 
 --[[--
   Rook Move: any number of spaces in a straight line
@@ -228,8 +229,7 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
     ret:AddLeap(toss, FULL_DELAY)
     -- add damage where the target used to be. Used for damage for the weapon preview
     -- if we add damage to the new position, it may show as targeting the attacking mech
-    -- TODO: weapon preview lib
-  	ret:AddDamage(helpers.safeDamage(target, self.Damage))
+    previewer:AddDamage(SpaceDamage(target, self.Damage))
 
     -- add damage using a script, so it does not show in preview
     ret:AddScript("Chess_Castle_Charge:ScriptDamage("..landing:GetString()..","..self.Damage..")")

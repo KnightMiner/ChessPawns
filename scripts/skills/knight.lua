@@ -1,6 +1,7 @@
-local mod = mod_loader.mods[modApi.currentMod]
-local helpers = require(mod.scriptPath .. "libs/helpers")
-local cutils = require(mod.scriptPath .. "libs/CUtils")
+local path = mod_loader.mods[modApi.currentMod].scriptPath
+local helpers = require(path .. "libs/helpers")
+local cutils = require(path .. "libs/CUtils")
+local previewer = require(path .. "weaponPreview/api")
 
 --[[--
   Used to safely get the armor status of a pawn.
@@ -285,8 +286,7 @@ function Chess_Knight_Smite:GetSkillEffect(p1, p2)
 		helpers.addLeap(ret, p1, p2)
 
 		-- add damage for display at old location
-		-- TODO: use previewer lib
-    ret:AddDamage(helpers.safeDamage(p1, selfDamage))
+		previewer:AddDamage(SpaceDamage(p1, selfDamage))
 
 		-- run kill script
 		ret:AddScript("Chess_Knight_Smite:Squash("..p2:GetString()..","..selfDamage..")")
