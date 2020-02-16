@@ -2,9 +2,9 @@ local mod = mod_loader.mods[modApi.currentMod]
 local helpers = require(mod.scriptPath .. "libs/helpers")
 
 --[[--
-  Adds all moves extending out in one direction to the object
+	Adds all moves extending out in one direction to the object
 
-  @param ret       SkillEffect instance
+	@param ret       SkillEffect instance
 	@param start     Start Point
 	@param offset    Offset direction Point
 	@param distance  number of spaces to travel
@@ -19,9 +19,9 @@ local function addDirectionMoves(ret, start, offset, distance)
 end
 
 --[[--
-  King Move: 1 space in any direction
+	King Move: 1 space in any direction
 
-  Upgrades: Alternate orthogonal and diagonal
+	Upgrades: Alternate orthogonal and diagonal
 ]]
 Chess_King_Move = {}
 function Chess_King_Move:GetTargetArea(p1)
@@ -35,7 +35,7 @@ function Chess_King_Move:GetTargetArea(p1)
 		diagonal = move
 	else
 		orthogonal = 1 + math.ceil(move / 2)
-	  diagonal = 1 + math.floor(move / 2)
+		diagonal = 1 + math.floor(move / 2)
 	end
 
 	-- add moves in all directions
@@ -66,28 +66,28 @@ function Chess_King_Move:GetSkillEffect(p1, p2)
 end
 
 --[[--
-  Spawn Pawn: Spawns up to 2 pawns to do the king's fighting
+	Spawn Pawn: Spawns up to 2 pawns to do the king's fighting
 
-  Upgrades: Alternate distance and diagonal
+	Upgrades: Alternate distance and diagonal
 ]]
 Chess_SpawnPawn = Deployable:new {
-  -- base stats
+	-- base stats
 	Class       = "Ranged",
 	Limited     = 0,
 	Damage      = 0,
-  PowerCost   = 2,
+	PowerCost   = 2,
 	Upgrades    = 2,
 	UpgradeCost = {2, 2},
-  -- settings
-	Deployed      = "Chess_Pawn",
-	DeployedBlack = "Chess_Pawn_Black",
-  -- effects
-	Icon            = "weapons/chess_spawn_pawn.png",
-	Projectile      = "effects/chess_shotup_pawn_yellow.png",
-	ProjectileBlack = "effects/chess_shotup_pawn_black.png",
-	LaunchSound     = "/props/factory_launch",
-	ImpactSound     = "/impact/generic/mech",
-  -- visual
+	-- settings
+	Deployed    = "Chess_Pawn",
+	DeployedAlt = "Chess_Pawn_Alt",
+	-- effects
+	Icon          = "weapons/chess_spawn_pawn.png",
+	Projectile    = "effects/chess_shotup_pawn.png",
+	ProjectileAlt = "effects/chess_shotup_pawn_alt.png",
+	LaunchSound   = "/props/factory_launch",
+	ImpactSound   = "/impact/generic/mech",
+	-- visual
 	TipImage = {
 		Unit          = Point(1,3),
 		Target        = Point(1,1),
@@ -99,8 +99,8 @@ Chess_SpawnPawn = Deployable:new {
 
 -- Range
 Chess_SpawnPawn_A = Chess_SpawnPawn:new {
-	Deployed      = "Chess_Pawn_A",
-	DeployedBlack = "Chess_Pawn_A_Black",
+	Deployed    = "Chess_Pawn_A",
+	DeployedAlt = "Chess_Pawn_A_Alt",
 	TipImage = {
 		Unit          = Point(1,3),
 		Target        = Point(1,1),
@@ -112,9 +112,9 @@ Chess_SpawnPawn_A = Chess_SpawnPawn:new {
 
 -- Explosion
 Chess_SpawnPawn_B = Chess_SpawnPawn:new {
-	Deployed      = "Chess_Pawn_B",
-	DeployedBlack = "Chess_Pawn_B_Black",
-  TipImage = {
+	Deployed    = "Chess_Pawn_B",
+	DeployedAlt = "Chess_Pawn_B_Alt",
+	TipImage = {
 		Unit          = Point(1,3),
 		Target        = Point(1,1),
 		Enemy         = Point(2,1),
@@ -126,27 +126,27 @@ Chess_SpawnPawn_B = Chess_SpawnPawn:new {
 
 -- Both
 Chess_SpawnPawn_AB = Chess_SpawnPawn:new {
-	Deployed      = "Chess_Pawn_AB",
-	DeployedBlack = "Chess_Pawn_AB_Black"
+	Deployed    = "Chess_Pawn_AB",
+	DeployedAlt = "Chess_Pawn_AB_Alt"
 }
 
--- true if it deploys a black pawn, false deploys a white. Unset is not a pawn
+-- true if it deploys a alt colored pawn, false deploys a normal. Unset is not a pawn
 local chess_pawns = {
-  Chess_Pawn          = true,
-  Chess_Pawn_Black    = false,
-  Chess_Pawn_A        = true,
-  Chess_Pawn_A_Black  = false,
-  Chess_Pawn_B        = true,
-  Chess_Pawn_B_Black  = false,
-  Chess_Pawn_AB       = true,
-  Chess_Pawn_AB_Black = false,
+	Chess_Pawn        = true,
+	Chess_Pawn_Alt    = false,
+	Chess_Pawn_A      = true,
+	Chess_Pawn_A_Alt  = false,
+	Chess_Pawn_B      = true,
+	Chess_Pawn_B_Alt  = false,
+	Chess_Pawn_AB     = true,
+	Chess_Pawn_AB_Alt = false,
 }
 
 --[[--
-  Gets a list of all pawn owners from teh region data.
+	Gets a list of all pawn owners from teh region data.
 	Not super efficient, so cache the value if possible
 
-  @return Map of pawn ID to pawn owner ID
+	@return Map of pawn ID to pawn owner ID
 ]]
 local function getPawnOwners()
 	local region = GetCurrentRegion()
@@ -158,7 +158,7 @@ local function getPawnOwners()
 				local owners = {}
 				for k, v in pairs(map) do
 					if k:sub(1, 4) == 'pawn' and type(v) == 'table' and v.id and v.owner then
-					  owners[v.id] = v.owner
+						owners[v.id] = v.owner
 					end
 				end
 				return owners
@@ -170,16 +170,32 @@ local function getPawnOwners()
 	return {}
 end
 
+-- default pawn color for tooltips or if we cannot find the mech color
+local DEFAULT_COLOR = 3
+
+--[[--
+	Gets the color of the mech
+
+	@return Mech color, or DEFAULT_COLOR if missing
+]]
+local function getColor(pawnId)
+	local color = nil
+	if type(GameData) == 'table' and type(GameData.current) == 'table' and type(GameData.current.colors) == 'table' then
+		color = GameData.current.colors[pawnId+1]
+	end
+	return color or DEFAULT_COLOR
+end
+
 function Chess_SpawnPawn:GetSkillEffect(p1, target)
 	local ret = SkillEffect()
 
 	-- skip running in the tooltip world as there is no proper region, plus only one pawn
-	local deployBlack = false
+	local deployAlt = false
+	local mechId = Pawn:GetId()
 	if not helpers.isTooltip() then
 		-- determine if we need to kill an existing pawn
 		local pawnToBeDestroyed = nil
 		local pawnCount = 0
-		local mechId = Pawn:GetId()
 		local pawns = extract_table(Board:GetPawns(TEAM_PLAYER))
 		-- in test mech, skip trying to find owner data, assume all pawns are owned by us
 		local testMech = IsTestMechScenario()
@@ -194,11 +210,11 @@ function Chess_SpawnPawn:GetSkillEffect(p1, target)
 				if pawnColor ~= nil then
 					-- increment found pawns, and store the color to spawn
 					pawnCount = pawnCount + 1
-		      deployBlack = pawnColor
+					deployAlt = pawnColor
 					-- oldest pawn is killed
 					if pawnToBeDestroyed == nil then
-		        pawnToBeDestroyed = pawn
-		      end
+						pawnToBeDestroyed = pawn
+					end
 				end
 			end
 		end
@@ -216,9 +232,16 @@ function Chess_SpawnPawn:GetSkillEffect(p1, target)
 
 	-- spawn the pawn
 	local damage = SpaceDamage(target,0)
-  local pawnType = deployBlack and self.DeployedBlack or self.Deployed
+	local pawnType = deployAlt and self.DeployedAlt or self.Deployed
+	-- set the color based on the current mech's pallet
+	if GAME and not helpers.isTooltip() then
+		_G[pawnType].ImageOffset = getColor(mechId)
+	else
+		_G[pawnType].ImageOffset = DEFAULT_COLOR
+	end
+
 	damage.sPawn = pawnType
-	ret:AddArtillery(damage, deployBlack and self.ProjectileBlack or self.Projectile)
+	ret:AddArtillery(damage, deployAlt and self.ProjectileAlt or self.Projectile)
 
 	return ret
 end

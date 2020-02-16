@@ -105,32 +105,32 @@ Chess_Pawn = Pawn:new {
 	SoundLocation = "/mech/distance/dstrike_mech/",
 	ImpactMaterial = IMPACT_METAL
 }
---- Same as Chess Pawn, but shows in black. Spawn Pawn alternates between the two colors
-Chess_Pawn_Black = Chess_Pawn:new { ImageOffset = 4 }
+--- Same as Chess Pawn, but shows in alt colors. Spawn Pawn alternates between the two colors
+Chess_Pawn_Alt = Chess_Pawn:new { Image = "chess_pawn_alt" }
 AddPawnName("Chess_Pawn")
-AddPawnName("Chess_Pawn_Black")
+AddPawnName("Chess_Pawn_Alt")
 
 --- Pawns for Spawn Pawn Upgrade 1 - Spear range is upgraded, allowing 2 tiles to be reachable
-Chess_Pawn_A       = Chess_Pawn:new   { SkillList = { "Chess_PawnSpear_A" } }
-Chess_Pawn_A_Black = Chess_Pawn_A:new { ImageOffset = 4 }
+Chess_Pawn_A     = Chess_Pawn:new   { SkillList = { "Chess_PawnSpear_A" } }
+Chess_Pawn_A_Alt = Chess_Pawn_A:new { Image = "chess_pawn_alt" }
 AddPawnName("Chess_Pawn_A")
-AddPawnName("Chess_Pawn_A_Black")
+AddPawnName("Chess_Pawn_A_Alt")
 
 --- Pawns for Spawn Pawn Upgrade 2 - Explode on death for 2 damage to surrounding units
-Chess_Pawn_B       = Chess_Pawn:new   {}
-Chess_Pawn_B_Black = Chess_Pawn_B:new { ImageOffset = 4 }
+Chess_Pawn_B      = Chess_Pawn:new   {}
+Chess_Pawn_B_Alt = Chess_Pawn_B:new { Image = "chess_pawn_alt" }
 AddPawnName("Chess_Pawn_B")
-AddPawnName("Chess_Pawn_B_Black")
+AddPawnName("Chess_Pawn_B_Alt")
 
 --- Pawns for combined upgrades
-Chess_Pawn_AB       = Chess_Pawn_B:new  { SkillList = { "Chess_PawnSpear_A" } }
-Chess_Pawn_AB_Black = Chess_Pawn_AB:new { ImageOffset = 4 }
+Chess_Pawn_AB     = Chess_Pawn_B:new  { SkillList = { "Chess_PawnSpear_A" } }
+Chess_Pawn_AB_Alt = Chess_Pawn_AB:new { Image = "chess_pawn_alt" }
 AddPawnName("Chess_Pawn_AB")
-AddPawnName("Chess_Pawn_AB_Black")
+AddPawnName("Chess_Pawn_AB_Alt")
 
 -- Pawn explosions --
 trait:Add{
-	PawnTypes = { "Chess_Pawn_B", "Chess_Pawn_AB", "Chess_Pawn_B_Black", "Chess_Pawn_AB_Black" },
+	PawnTypes = { "Chess_Pawn_B", "Chess_Pawn_AB", "Chess_Pawn_B_Alt", "Chess_Pawn_AB_Alt" },
 	Icon = { "img/combat/icons/icon_explode.png", Point(0,8) },
 	Description = {"Explosive Upgrade", "This unit will always explode on death, dealing 2 damage to adjacent tiles."}
 }
@@ -145,7 +145,7 @@ function Chess_Pawn_B:GetDeathEffect(p1)
   -- explosion deals 2 damage in all directions
 	for dir = DIR_START, DIR_END do
 		-- TODO: delay is a little weird
-		ret:AddDelay(0.075)
+		--ret:AddDelay(0.075)
 
 		damage = SpaceDamage(p1, 0)
 		damage.sAnimation = PUSHEXPLO2_ANIMS[dir]
@@ -161,7 +161,7 @@ function Chess_Pawn_B:GetDeathEffect(p1)
   -- add smoke and deal 2 damage to attacker on same space
 	local damage = SpaceDamage(p1, 2)
 	damage.sAnimation = "explo_fire1"
-	damage.iSmoke = 1
+	--damage.iSmoke = 1
 	ret:AddDamage(damage)
 	ret:AddBounce(p1, 3)
 

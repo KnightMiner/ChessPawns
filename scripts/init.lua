@@ -43,13 +43,20 @@ function mod:init()
       Animated =          { PosX = -12, PosY = 0, NumFrames = 4 },
       Death =             { PosX = -12, PosY = 0, NumFrames = 5, Time = 0.09, Loop = false },
       Icon =              {},
+    },
+    {
+      Name = "chess_pawn_alt",
+      Default =           { PosX = -12, PosY = 0 },
+      Animated =          { PosX = -12, PosY = 0, NumFrames = 4 },
+      Death =             { PosX = -12, PosY = 0, NumFrames = 5, Time = 0.09, Loop = false },
+      Icon =              {},
     }
 	)
-	sprites.addSprite("chess_castle_charge",      "weapons")
-	sprites.addSprite("chess_knight_stomp",       "weapons")
-	sprites.addSprite("chess_spawn_pawn",         "weapons")
-	sprites.addSprite("chess_shotup_pawn_yellow", "effects")
-	sprites.addSprite("chess_shotup_pawn_black",  "effects")
+	sprites.addSprite("chess_castle_charge",   "weapons")
+	sprites.addSprite("chess_knight_stomp",    "weapons")
+	sprites.addSprite("chess_spawn_pawn",      "weapons")
+	sprites.addSprite("chess_shotup_pawn",     "effects")
+	sprites.addSprite("chess_shotup_pawn_alt", "effects")
 
 	local texts = require(self.scriptPath.."weapon_texts")
 	modApi:addWeapon_Texts(texts)
