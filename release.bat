@@ -13,3 +13,4 @@ REM Zipping contents
 powershell.exe -nologo -noprofile -command "& { Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::CreateFromDirectory('build', 'Chess-Pawns-#.#.#.zip'); }"
 
 REM Removing build directory
+RMDIR /q /s build
