@@ -80,7 +80,8 @@ local function blockType(point)
 	end
 
 	-- if empty, its free
-	local path = Pawn:GetPathProf()
+	-- for some reason the 16 bit is set for PathProf, not sure what it means
+	local path = Pawn:GetPathProf() % 16
 	if not Board:IsBlocked(point, path) then
 		return FREE
 	end
@@ -88,8 +89,14 @@ local function blockType(point)
 	if path == PATH_FLYER then
 		return OCCUPIED
 	end
-	-- if own team, just occupied
-	if Board:IsPawnTeam(point, Pawn:GetTeam()) then
+
+	-- Kawn does not care about any pawns
+	if path == PATH_ROADRUNNER then
+		if Board:IsPawnSpace(point) then
+			return OCCUPIED
+		end
+	-- anyone else just skips own team
+	elseif Board:IsPawnTeam(point, Pawn:GetTeam()) then
 		return OCCUPIED
 	end
 	-- any other blockages (hole, mountain, vek)
