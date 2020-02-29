@@ -293,12 +293,6 @@ function Chess_Knight_Smite:GetSkillEffect(p1, p2)
 	else
 		-- just normal leap if no enemy
 		helpers.addLeap(ret, p1, p2)
-
-		-- count the pod as a target, killing it and dealing 1 self damage. just to be mean
-		if Board:IsPod(p2) then
-			ret:AddDamage(SpaceDamage(p2, 1))
-			ret:AddDamage(helpers.animationDamage(p2, "ExploAir1"))
-		end
 	end
 
 	-- bounce a bit on landing

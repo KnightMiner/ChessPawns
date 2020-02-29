@@ -200,10 +200,6 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
   local newPos = target - dirVec
   local moved = p1 ~= newPos
   if moved then
-    -- charging onto a pod should not save it
-    if doDamage and Board:IsPod(newPos) then
-      ret:AddScript("Chess_Castle_Charge:ScriptDamage("..newPos:GetString()..",1)")
-    end
     ret:AddCharge(Board:GetSimplePath(p1, newPos), p1:Manhattan(newPos) * 0.1)
   end
 
