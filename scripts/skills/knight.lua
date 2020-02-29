@@ -48,9 +48,10 @@ local function pointValid(point, isAttack, bonus)
 	if not Board:IsValid(point) then
 		return false
 	end
+
 	-- if not blocked, attack allows anything, but stop holes for normal, non flying movement
-	if not Board:IsBlocked(point, PATH_FLYER) then
-		return isAttack or Pawn:IsFlying() or Board:GetTerrain(point) ~= TERRAIN_HOLE
+	if not Board:IsBlocked(point, isAttack and PATH_FLYER or Pawn:GetPathProf()) then
+		return true
 	end
 
 	-- if blocked, movement will fail. attacks may work though
