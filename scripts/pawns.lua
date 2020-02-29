@@ -16,7 +16,7 @@ Chess_Knight = Pawn:new {
 	DefaultTeam = TEAM_PLAYER,
 	Massive = true,
 	-- stats
-	Health = 4,
+	Health = 3,
 	MoveSpeed = 2,
 	Armor = true,
 	-- skills
