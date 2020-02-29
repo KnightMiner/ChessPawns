@@ -15,7 +15,7 @@ local function getHealthEquivelent(pawn, useMax)
 	-- no max returns current health
 	local health
 	if useMax then
-		health = cutils.GetMaxHealth(pawn)
+		health = cutils.GetPawnMaxHealth(pawn)
 	else
 		health = pawn:GetHealth()
 	end
@@ -56,6 +56,11 @@ local function pointValid(point, isAttack, bonus)
 	-- if blocked, movement will fail. attacks may work though
 	if not isAttack then
 		return false
+	end
+
+	-- can target mountains provided they are damaged
+	if Board:GetTerrain(point) == TERRAIN_MOUNTAIN and cutils.GetTileHealth(Board, point) == 1 then
+		return true
 	end
 
 	-- if not a pawn, means blocked by a building or mountain
@@ -283,6 +288,12 @@ function Chess_Knight_Smite:GetSkillEffect(p1, p2)
 
 		-- run kill script
 		ret:AddScript("Chess_Knight_Smite:Squash("..p2:GetString()..","..selfDamage..")")
+	elseif Board:GetTerrain(p2) == TERRAIN_MOUNTAIN then
+			-- move mech
+			helpers.addLeap(ret, p1, p2)
+
+			-- attack mountain and mech
+			ret:AddDamage(SpaceDamage(p2, 1))
 	else
 		-- just normal leap if no enemy
 		helpers.addLeap(ret, p1, p2)
