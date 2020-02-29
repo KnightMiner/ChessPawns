@@ -4,6 +4,7 @@ local mod = {
 	version = "1.0.0",
 	requirements = {},
 	icon = "img/icon.png",
+	modApiVersion = "2.4.1",
 }
 
 function mod:init()
