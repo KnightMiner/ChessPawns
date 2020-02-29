@@ -1,5 +1,6 @@
-local mod = mod_loader.mods[modApi.currentMod]
-local helpers = require(mod.scriptPath .. "libs/helpers")
+local path = mod_loader.mods[modApi.currentMod].scriptPath
+local helpers = require(path .. "libs/helpers")
+local previewer = require(path .. "weaponPreview/api")
 
 --[[--
 	Adds all moves extending out in one direction to the object
@@ -77,7 +78,7 @@ Chess_Spawn_Pawn = Deployable:new {
 	Damage      = 0,
 	PowerCost   = 2,
 	Upgrades    = 2,
-	UpgradeCost = {2, 2},
+	UpgradeCost = {2, 3},
 	-- settings
 	Deployed    = "Chess_Pawn",
 	DeployedAlt = "Chess_Pawn_Alt",
@@ -125,7 +126,7 @@ Chess_Spawn_Pawn_B = Chess_Spawn_Pawn:new {
 }
 
 -- Both
-Chess_Spawn_Pawn_AB = Chess_Spawn_Pawn:new {
+Chess_Spawn_Pawn_AB = Chess_Spawn_Pawn_B:new {
 	Deployed    = "Chess_Pawn_AB",
 	DeployedAlt = "Chess_Pawn_AB_Alt"
 }
@@ -140,6 +141,14 @@ local chess_pawns = {
 	Chess_Pawn_B_Alt  = false,
 	Chess_Pawn_AB     = true,
 	Chess_Pawn_AB_Alt = false,
+}
+
+-- true if the pawn type explodes
+local PAWN_EXPLODES = {
+	Chess_Pawn_B      = true,
+	Chess_Pawn_B_Alt  = true,
+	Chess_Pawn_AB     = true,
+	Chess_Pawn_AB_Alt = true,
 }
 
 --[[--
@@ -186,6 +195,27 @@ local function getColor(pawnId)
 	return color or DEFAULT_COLOR
 end
 
+-- Allows targeting water and holes instead of just land
+function Chess_Spawn_Pawn_B:GetTargetArea(point)
+	local ret = PointList()
+
+	for dir = DIR_START, DIR_END do
+		for i = 2, self.ArtillerySize do
+			local curr = Point(point + DIR_VECTORS[dir] * i)
+			if not Board:IsValid(curr) then
+				break
+			end
+
+			if not Board:IsBlocked(curr, PATH_FLYER) then
+				ret:push_back(curr)
+			end
+		end
+	end
+
+	return ret
+end
+
+-- Logic to limit to 2 pawns and to alternate colors
 function Chess_Spawn_Pawn:GetSkillEffect(p1, target)
 	local ret = SkillEffect()
 
@@ -222,11 +252,18 @@ function Chess_Spawn_Pawn:GetSkillEffect(p1, target)
 		-- if we found 2 pawns, kill the oldest one
 		if pawnCount >= 2 and pawnToBeDestroyed ~= nil then
 			local space = pawnToBeDestroyed:GetSpace()
-			local damage = SpaceDamage(space,DAMAGE_DEATH)
+			local damage = SpaceDamage(space, DAMAGE_DEATH)
 			damage.sAnimation = "explo_fire1"
 			ret:AddDamage(damage)
 			ret:AddSound("/impact/generic/explosion")
 			ret:AddBounce(space, 3)
+
+			-- damage preview on old pawn for explosions
+			if PAWN_EXPLODES[pawnToBeDestroyed:GetType()] then
+				for dir = DIR_START, DIR_END do
+					previewer:AddDamage(SpaceDamage(space + DIR_VECTORS[dir], 2))
+				end
+			end
 		end
 	end
 
@@ -242,6 +279,14 @@ function Chess_Spawn_Pawn:GetSkillEffect(p1, target)
 
 	damage.sPawn = pawnType
 	ret:AddArtillery(damage, deployAlt and self.ProjectileAlt or self.Projectile)
+
+	-- if targeting water with an explosive pawn, preview that explosion
+	if PAWN_EXPLODES[pawnType] and Board:IsBlocked(target, PATH_GROUND) then
+		previewer:AddDamage(SpaceDamage(target, 2))
+		for dir = DIR_START, DIR_END do
+			previewer:AddDamage(SpaceDamage(target + DIR_VECTORS[dir], 2))
+		end
+	end
 
 	return ret
 end

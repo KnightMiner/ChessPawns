@@ -19,7 +19,7 @@ return {
 	Chess_Spawn_Pawn_Upgrade1 = "+1 Range",
 	Chess_Spawn_Pawn_A_UpgradeDescription = "Pawn spear range increased to 2.",
 	Chess_Spawn_Pawn_Upgrade2 = "Explosive",
-	Chess_Spawn_Pawn_B_UpgradeDescription = "Pawns explode when killed, dealing 2 damage to adjacent tiles.",
+	Chess_Spawn_Pawn_B_UpgradeDescription = "Pawns explode when killed, dealing 2 damage to adjacent tiles. Can target water and holes to cause an immediate explosion.",
 
 	Chess_Pawn_Spear_Name = "Pawn Spear",
 	Chess_Pawn_Spear_Description = "Strike a target at melee range with a spear, doing damage and pushing.",
