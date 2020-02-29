@@ -4,14 +4,46 @@ local cutils = require(path .. "libs/CUtils")
 local previewer = require(path .. "weaponPreview/api")
 
 --[[--
-  Determines if a point is valid for knight movement or attack
+	Determines the equivelent health after applying status effects for a unit, used for attack strength comparisons
 
-  @param point       Point targeting
-  @param isAttack    If true, we are attacking so pawns and holes can be targeted
-  @param isUpgraded  If true, we have less self damage and can do a little more damage
-  @return  True if the point is valid
+	@param pawn    Pawn of focus
+	@param useMax  If true, returns the maximum health. False returns the current health
+	@return  True if the point is valid
 ]]
-local function pointValid(point, isAttack, isUpgraded)
+local function getHealthEquivelent(pawn, useMax)
+	-- when using max, return highest possible health
+	-- no max returns current health
+	local health
+	if useMax then
+		health = cutils.GetMaxHealth(pawn)
+	else
+		health = pawn:GetHealth()
+	end
+
+	-- ignore ACID if using max health
+	if not useMax and pawn:IsAcid() then
+		health = math.ceil(health / 2)
+	-- note this returns true even if acid
+	elseif pawn:IsArmor() then
+		health = health + 1
+	end
+	-- ice boosts damage by 1
+	if pawn:IsFrozen() then
+		health = health + 1
+	end
+
+	return health
+end
+
+--[[--
+	Determines if a point is valid for knight movement or attack
+
+	@param point       Point targeting
+	@param isAttack    If true, we are attacking so pawns and holes can be targeted
+	@param bonus       Bonus health to remove from the target
+	@return  True if the point is valid
+]]
+local function pointValid(point, isAttack, bonus)
 	-- invalid points immediately fail
 	if not Board:IsValid(point) then
 		return false
@@ -44,17 +76,7 @@ local function pointValid(point, isAttack, isUpgraded)
 		return false
 	end
 
-	-- max damage is the pawns max heallth, taking armor and the lower self damage upgrades into account
-	local maxDamage = cutils.GetMaxHealth(Pawn) + (Pawn:IsArmor() and 1 or 0) + (isUpgraded and 1 or 0)
-	-- target is lowered by acid and raised by armor
-	local targetHealth = pawnAtPoint:GetHealth()
-	if pawnAtPoint:IsAcid() then
-		targetHealth = math.ceil(targetHealth / 2)
-	elseif pawnAtPoint:IsArmor() then
-		targetHealth = targetHealth + 1
-	end
-
-	return maxDamage >= targetHealth
+	return getHealthEquivelent(Pawn, true) >= (getHealthEquivelent(pawnAtPoint, false) - bonus)
 end
 
 --[[--
@@ -91,13 +113,13 @@ function Chess_Knight_Move:GetTargetArea(p1)
 				-- note IsAttack is never true after here
 				if move >= 4 then
 					point = point + offset
-					if pointValid(point, false, false) then
+					if pointValid(point, false, 0) then
 						ret:push_back(point)
 
 						--  third leap
 						if move >= 6 then
 							point = point + offset
-							if pointValid(point, false, false) then
+							if pointValid(point, false, 0) then
 								ret:push_back(point)
 							end
 						end
@@ -112,13 +134,13 @@ function Chess_Knight_Move:GetTargetArea(p1)
 			-- direction of movement
 			local offset = DIR_VECTORS[dir] * 3
 			local point = p1 + offset
-			if pointValid(point, false, false) then
+			if pointValid(point, false, 0) then
 				ret:push_back(point)
 
 				-- double threeleaper
 				if move >= 5 then
 					point = point + offset
-					if pointValid(point, false, false) then
+					if pointValid(point, false, 0) then
 						ret:push_back(point)
 					end
 				end
@@ -185,8 +207,8 @@ Chess_Knight_Smite = Chess_Knight_Move:new {
 	UpgradeCost = {1, 2},
 	-- settings
 	IsAttack = true,
-  Push = false,
-	LessSelfDamage = false,
+	Push = false,
+	LessSelfDamage = 0,
 	-- effects
 	Icon = "weapons/chess_knight_stomp.png",
 	LaunchSound = "/weapons/modified_cannons",
@@ -214,13 +236,13 @@ Chess_Knight_Smite_A = Chess_Knight_Smite:new {
 
 -- Damage upgrade
 Chess_Knight_Smite_B = Chess_Knight_Smite:new {
-	LessSelfDamage = true
+	LessSelfDamage = 1
 }
 
 -- Both upgrades
 Chess_Knight_Smite_AB = Chess_Knight_Smite_A:new {
-  Push = true,
-	LessSelfDamage = true
+	Push = true,
+	LessSelfDamage = 1
 }
 
 --[[--
@@ -251,21 +273,7 @@ function Chess_Knight_Smite:GetSkillEffect(p1, p2)
 	local target = Board:GetPawn(p2)
 	if target ~= nil and target:GetSpace() ~= Pawn:GetSpace() then
 		-- deal damage based on targets health
-		local selfDamage = target:GetHealth()
-		-- acid means less self damage, they squash easier
-		-- skip in tooltips, as the modloader 2.4.0 has a bug where this crashes
-		if not helpers.isTooltip() then
-			if target:IsAcid() then
-				selfDamage = math.ceil(selfDamage / 2)
-			-- armor means more
-			elseif target:IsArmor() then
-				selfDamage = selfDamage + 1
-			end
-		end
-		-- less self drops it again
-		if self.LessSelfDamage then
-			selfDamage = math.max(selfDamage - 1)
-		end
+		local selfDamage = getHealthEquivelent(target) - self.LessSelfDamage
 
 		-- move mech
 		helpers.addLeap(ret, p1, p2)
