@@ -1,7 +1,7 @@
 local mod = {
   id = "Knight_Chess",
   name = "Chess Pawns",
-  version = "1.0.0",
+  version = "1.0.1",
   requirements = {},
   icon = "img/icon.png",
   modApiVersion = "2.4.1",
