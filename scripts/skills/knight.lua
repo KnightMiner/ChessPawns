@@ -307,8 +307,9 @@ function Chess_Knight_Smite:GetSkillEffect(p1, p2)
 		-- move mech
 		helpers.addLeap(ret, p1, p2)
 
-		-- add damage for display at old location
+		-- add damage for display at both locations
 		previewer:AddDamage(SpaceDamage(p1, selfDamage))
+		previewer:AddDamage(SpaceDamage(p2, DAMAGE_DEATH))
 
 		-- run kill script
 		ret:AddScript("Chess_Knight_Smite:Squash("..p2:GetString()..","..selfDamage..")")
