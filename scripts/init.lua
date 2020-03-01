@@ -140,6 +140,10 @@ function mod:load(options,version)
   -- copy config over
   self.config.rookRockThrow = options.rookRockThrow.enabled
   self.config.knightCapMax = options.knightCapMax.enabled
+  local image = self.config.rookRockThrow and "Mountain" or "Normal"
+  for _, weapon in pairs({"Chess_Castle_Charge", "Chess_Castle_Charge_A", "Chess_Castle_Charge_B", "Chess_Castle_Charge_AB"}) do
+    _G[weapon].TipImage = _G[weapon].TipImages[image]
+  end
 end
 
 return mod

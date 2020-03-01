@@ -109,23 +109,50 @@ Chess_Castle_Charge = Skill:new {
   LaunchSound = "/weapons/charge",
   ImpactSound = "/weapons/charge_impact",
   -- visual
-  TipImage = {
-    Unit   = Point(2,3),
-    Enemy  = Point(2,0),
-    Target = Point(2,0)
+  TipImages = {
+    -- tip image with mountain config option
+    Mountain = {
+      Unit          = Point(3,2),
+      Enemy         = Point(3,3),
+      Target        = Point(3,3),
+      Second_Origin = Point(3,2),
+      Mountain      = Point(0,2),
+  		Second_Target = Point(0,2)
+    },
+    -- tip image with no mountain enabled
+    Normal = {
+      Unit   = Point(3,2),
+      Enemy  = Point(0,2),
+      Target = Point(0,2)
+    }
   }
 }
+Chess_Castle_Charge.TipImage = Chess_Castle_Charge.TipImages.Mountain
 
 -- Upgrade 1: Toss upgrade
 Chess_Castle_Charge_A = Chess_Castle_Charge:new {
   Push = true,
-  TipImage = {
-    Unit   = Point(2,2),
-    Enemy  = Point(2,0),
-    Enemy2 = Point(1,2),
-    Target = Point(2,0)
+  TipImages = {
+    -- tip image with mountain config option
+    Mountain = {
+      Unit          = Point(3,2),
+      Enemy         = Point(3,3),
+      Enemy2        = Point(2,1),
+      Target        = Point(3,3),
+      Second_Origin = Point(3,2),
+      Mountain      = Point(0,2),
+  		Second_Target = Point(0,2)
+    },
+    -- tip image with no mountain enabled
+    Normal = {
+      Unit   = Point(3,2),
+      Enemy  = Point(0,2),
+      Enemy2 = Point(3,1),
+      Target = Point(0,2)
+    }
   }
 }
+Chess_Castle_Charge_A.TipImage = Chess_Castle_Charge_A.TipImages.Mountain
 
 -- Upgrade 2: Damage upgrade
 Chess_Castle_Charge_B = Chess_Castle_Charge:new {
