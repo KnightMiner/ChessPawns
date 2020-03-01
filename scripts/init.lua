@@ -5,7 +5,19 @@ local mod = {
 	requirements = {},
 	icon = "img/icon.png",
 	modApiVersion = "2.4.1",
+	config = {
+		rookRockThrow = true
+	}
 }
+
+function mod:metadata()
+	modApi:addGenerationOption(
+		"rookRockThrow",
+		"Rook Rock Throw",
+		"If checked, the rook is allowed to target mountains, throwing a rock instead of a unit",
+		{ enabled = true }
+	)
+end
 
 function mod:init()
 	self.modApiExt = require(self.scriptPath .."modApiExt/modApiExt")
@@ -99,6 +111,8 @@ function mod:load(options,version)
 		"These mech employ unusual weapons and unique movement patterns.",
 		self.resourcePath.."img/icon.png"
 	)
+	-- copy config over
+	self.config.rookRockThrow = options.rookRockThrow.enabled
 end
 
 return mod
