@@ -1,4 +1,5 @@
 local mod = mod_loader.mods[modApi.currentMod]
+local config = mod.config
 local helpers = mod:loadScript("libs/helpers")
 local cutils = mod:loadScript("libs/CUtils")
 local previewer = mod:loadScript("weaponPreview/api")
@@ -124,7 +125,7 @@ function Chess_Knight_Move:GetTargetArea(p1)
   -- add a terrain description for max damage
   local maxDamage = 0
   if self.IsAttack then
-    maxDamage = getHealthEquivelent(Pawn, true) + self.LessSelfDamage
+    maxDamage = getHealthEquivelent(Pawn, config.knightCapMax) + self.LessSelfDamage
     previewer:AddDesc(p1, "knight_max_" .. maxDamage)
   end
 

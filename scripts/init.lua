@@ -6,7 +6,8 @@ local mod = {
   icon = "img/icon.png",
   modApiVersion = "2.4.1",
   config = {
-    rookRockThrow = true
+    rookRockThrow = true,
+    knightCapMax = false
   }
 }
 
@@ -25,6 +26,12 @@ function mod:metadata()
     "Rook Rock Throw",
     "If checked, the rook is allowed to target mountains, throwing a rock instead of a unit",
     { enabled = true }
+  )
+  modApi:addGenerationOption(
+    "knightCapMax",
+    "Knight Cap Max Health",
+    "If checked, Knight Stomp is capped at the units max health. Unchecked means it caps at current health",
+    { enabled = false }
   )
 end
 
@@ -129,9 +136,10 @@ function mod:load(options,version)
     "These mech employ unusual weapons and unique movement patterns.",
     self.resourcePath.."img/icon.png"
   )
-  
+
   -- copy config over
   self.config.rookRockThrow = options.rookRockThrow.enabled
+  self.config.knightCapMax = options.knightCapMax.enabled
 end
 
 return mod
