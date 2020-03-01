@@ -40,10 +40,10 @@ end
 
 	@param point       Point targeting
 	@param isAttack    If true, we are attacking so pawns and holes can be targeted
-	@param bonus       Bonus health to remove from the target
+	@param maxDamage   Max damage the knight can deal
 	@return  True if the point is valid
 ]]
-local function pointValid(point, isAttack, bonus)
+local function pointValid(point, isAttack, maxDamage)
 	-- invalid points immediately fail
 	if not Board:IsValid(point) then
 		return false
@@ -60,8 +60,13 @@ local function pointValid(point, isAttack, bonus)
 	end
 
 	-- can target mountains provided they are damaged
-	if Board:GetTerrain(point) == TERRAIN_MOUNTAIN and cutils.GetTileHealth(Board, point) == 1 then
-		return true
+	if Board:GetTerrain(point) == TERRAIN_MOUNTAIN then
+		if cutils.GetTileHealth(Board, point) == 1 then
+			return true
+		else
+			previewer:AddDesc(point, "knight_mountain")
+			return false
+		end
 	end
 
 	-- if not a pawn, means blocked by a building or mountain
@@ -76,13 +81,25 @@ local function pointValid(point, isAttack, bonus)
 		return true
 	end
 
-	-- no attacking shielded enemies, that takes 2 hits
 	-- no attacking pawns with a corpse (false for mechs oddly, so check that too)
-	if pawnAtPoint:IsShield() or pawnAtPoint:IsMech() or _G[pawnAtPoint:GetType()]:GetCorpse() then
+	if pawnAtPoint:IsMech() or _G[pawnAtPoint:GetType()]:GetCorpse() then
+		previewer:AddDesc(point, "knight_corpse")
 		return false
 	end
 
-	return getHealthEquivelent(Pawn, true) >= (getHealthEquivelent(pawnAtPoint, false) - bonus)
+	-- no attacking shielded enemies, that takes 2 hits
+		if pawnAtPoint:IsShield() then
+		previewer:AddDesc(point, "knight_shielded")
+		return false
+	end
+
+	-- cap based on knight's and enemies health
+	if (maxDamage < getHealthEquivelent(pawnAtPoint, false)) then
+		previewer:AddDesc(point, "knight_too_high_" .. maxDamage)
+		return false
+	end
+
+	return true
 end
 
 --[[--
@@ -104,6 +121,12 @@ Chess_Knight_Move = Move:new {
 function Chess_Knight_Move:GetTargetArea(p1)
 	local ret = PointList()
 	local move = self.IsAttack and 2 or Pawn:GetMoveSpeed()
+	-- add a terrain description for max damage
+	local maxDamage = 0
+	if self.IsAttack then
+		maxDamage = getHealthEquivelent(Pawn, true) + self.LessSelfDamage
+		previewer:AddDesc(p1, "knight_max_" .. maxDamage)
+	end
 
 	-- all four directions
 	for dir = DIR_START, DIR_END do
@@ -112,7 +135,7 @@ function Chess_Knight_Move:GetTargetArea(p1)
 			-- direction of this movement
 			local offset = DIR_VECTORS[dir] * 2 + DIR_VECTORS[(dir + d) % 4]
 			local point = p1 + offset
-			if pointValid(point, self.IsAttack, self.LessSelfDamage) then
+			if pointValid(point, self.IsAttack, maxDamage) then
 				ret:push_back(point)
 
 				-- second knight leap

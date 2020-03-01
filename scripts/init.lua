@@ -20,6 +20,7 @@ function mod:metadata()
 end
 
 function mod:init()
+	require(self.scriptPath .. "weaponPreview/api")
 	self.modApiExt = require(self.scriptPath .."modApiExt/modApiExt")
 	self.modApiExt:init()
 	local sprites = require(self.scriptPath .. "libs/sprites")
@@ -73,6 +74,7 @@ function mod:init()
 
 	local texts = require(self.scriptPath.."weapon_texts")
 	modApi:addWeapon_Texts(texts)
+	require(self.scriptPath.."tile_texts")
 	require(self.scriptPath.."skills/king")
 	require(self.scriptPath.."skills/knight")
 	require(self.scriptPath.."skills/rook")
