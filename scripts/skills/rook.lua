@@ -1,8 +1,8 @@
-local config = mod_loader.mods[modApi.currentMod].config
-local path = mod_loader.mods[modApi.currentMod].scriptPath
-local helpers = require(path .. "libs/helpers")
-local cutils = require(path .. "libs/CUtils")
-local previewer = require(path .. "weaponPreview/api")
+local mod = mod_loader.mods[modApi.currentMod]
+local config = mod.config
+local helpers = mod:loadScript("libs/helpers")
+local cutils = mod:loadScript("libs/CUtils")
+local previewer = mod:loadScript("weaponPreview/api")
 
 --[[--
   Rook Move: any number of spaces in a straight line
@@ -96,34 +96,34 @@ end
   Upgrades: Toss and Damage
 ]]
 Chess_Castle_Charge = Skill:new {
-	-- base stats
+  -- base stats
   Class = "Brute",
   PowerCost = 1,
   Upgrades = 2,
   UpgradeCost = {1, 3},
-	-- settings
+  -- settings
   Damage = 1,
   Push = false,
-	-- effects
+  -- effects
   Icon = "weapons/chess_castle_charge.png",
-	LaunchSound = "/weapons/charge",
-	ImpactSound = "/weapons/charge_impact",
+  LaunchSound = "/weapons/charge",
+  ImpactSound = "/weapons/charge_impact",
   -- visual
   TipImage = {
-		Unit   = Point(2,3),
-		Enemy  = Point(2,0),
-		Target = Point(2,0)
-	}
+    Unit   = Point(2,3),
+    Enemy  = Point(2,0),
+    Target = Point(2,0)
+  }
 }
 
 -- Upgrade 1: Toss upgrade
 Chess_Castle_Charge_A = Chess_Castle_Charge:new {
   Push = true,
   TipImage = {
-		Unit   = Point(2,2),
-		Enemy  = Point(2,0),
-		Enemy2 = Point(1,2),
-		Target = Point(2,0)
+    Unit   = Point(2,2),
+    Enemy  = Point(2,0),
+    Enemy2 = Point(1,2),
+    Target = Point(2,0)
   }
 }
 
@@ -140,10 +140,10 @@ Chess_Castle_Charge_AB = Chess_Castle_Charge_A:new {
 
 --- Can charge in any direction, can target mobile enemies if there is a space to put them
 function Chess_Castle_Charge:GetTargetArea(start)
-	local ret = PointList()
+  local ret = PointList()
 
   -- in each direction, draw a full path
-	for dir = DIR_START, DIR_END do
+  for dir = DIR_START, DIR_END do
     local offset = DIR_VECTORS[dir]
     local point = start + offset
     if Board:IsValid(point) then
@@ -225,11 +225,11 @@ end
 
 --- Flip the target over ourselves
 function Chess_Castle_Charge:GetSkillEffect(p1, p2)
-	local ret = SkillEffect()
-	local dir = GetDirection(p2 - p1)
-	local dirVec = DIR_VECTORS[dir]
-	local path = PATH_PROJECTILE
-	local target = GetProjectileEnd(p1, p2, path)
+  local ret = SkillEffect()
+  local dir = GetDirection(p2 - p1)
+  local dirVec = DIR_VECTORS[dir]
+  local path = PATH_PROJECTILE
+  local target = GetProjectileEnd(p1, p2, path)
 
   local doDamage = true
   local isMountain = config.rookRockThrow and Board:GetTerrain(target) == TERRAIN_MOUNTAIN
@@ -300,14 +300,12 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
 
     -- push to either side
     if self.Push then
-      local sideDir = (dir + 1) % 4
-      local push = SpaceDamage(landing + DIR_VECTORS[sideDir], 0, sideDir)
-      push.sAnimation = "airpush_"..sideDir
-      ret:AddDamage(push)
-      sideDir = (dir - 1) % 4
-      push = SpaceDamage(landing + DIR_VECTORS[sideDir], 0, sideDir)
-      push.sAnimation = "airpush_"..sideDir
-      ret:AddDamage(push)
+      for i = -1, 1, 2 do
+        local sideDir = (dir + i) % 4
+        local push = SpaceDamage(landing + DIR_VECTORS[sideDir], 0, sideDir)
+        push.sAnimation = "airpush_"..sideDir
+        ret:AddDamage(push)
+      end
     end
   end
 

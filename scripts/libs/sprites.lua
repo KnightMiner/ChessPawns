@@ -34,16 +34,16 @@ end
 ]]
 local function addMechAnim(name, object, suffix, fileSuffix)
   if object then
-    -- default fileSuffix to the animation suffix
-    fileSuffix = fileSuffix or suffix
+  -- default fileSuffix to the animation suffix
+  fileSuffix = fileSuffix or suffix
 
-    -- add the sprite to the resource list
-    local filename = name .. fileSuffix
-    sprites.addSprite(filename, "units/player")
+  -- add the sprite to the resource list
+  local filename = name .. fileSuffix
+  sprites.addSprite(filename, "units/player")
 
-    -- add the mech animation to the animation list
-    object.Image = mechPath(filename)
-    ANIMS[name..suffix] = ANIMS.MechUnit:new(object);
+  -- add the mech animation to the animation list
+  object.Image = mechPath(filename)
+  ANIMS[name..suffix] = ANIMS.MechUnit:new(object);
   end
 end
 
@@ -54,7 +54,7 @@ end
 ]]
 function sprites.addMechs(...)
   for _, object in pairs({...}) do
-  	local name = object.Name
+    local name = object.Name
 
     -- these types are pretty uniform
     addMechAnim(name, object.Default,         ""                     )
@@ -69,7 +69,7 @@ function sprites.addMechs(...)
       -- firstly, we have the extra hanger sprite
       sprites.addSprite(name .. "_h", "units/player")
 
-      -- addd the regular no shadow sprite
+      -- add the regular no shadow sprite
       local iconname = name .. "_ns"
       sprites.addSprite(iconname, "units/player")
 

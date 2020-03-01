@@ -1,5 +1,5 @@
 local mod = mod_loader.mods[modApi.currentMod]
-local helpers = require(mod.scriptPath .. "libs/helpers")
+local helpers = mod:loadScript("libs/helpers")
 
 --[[--
   Pawn Move: 2 space in a straight line
@@ -17,30 +17,30 @@ end
   Upgrade: Increases range by 1
 ]]
 Chess_Pawn_Spear = Prime_Spear:new{
-	Class        = "Unique",
-	Range        = 1,
-	PathSize     = 1,
-	Damage       = 1,
-	Push         = 1,
-	PowerCost    = 0,
-	Upgrades     = 1,
-	UpgradeCost  = {1},
-	LaunchSound  = "/weapons/sword",
-	TipImage     = {
-		Unit       = Point(2,3),
-		Enemy      = Point(2,2),
-		Target     = Point(2,2),
-		CustomPawn = "Chess_Pawn"
-	}
+  Class        = "Unique",
+  Range        = 1,
+  PathSize     = 1,
+  Damage       = 1,
+  Push         = 1,
+  PowerCost    = 0,
+  Upgrades     = 1,
+  UpgradeCost  = {1},
+  LaunchSound  = "/weapons/sword",
+  TipImage     = {
+    Unit       = Point(2,3),
+    Enemy      = Point(2,2),
+    Target     = Point(2,2),
+    CustomPawn = "Chess_Pawn"
+  }
 }
 
 Chess_Pawn_Spear_A = Chess_Pawn_Spear:new {
   Range = 2,
   PathSize = 2,
-	TipImage     = {
-		Unit       = Point(2,3),
-		Enemy      = Point(2,1),
-		Target     = Point(2,1),
-		CustomPawn = "Chess_Pawn_A"
-	}
+  TipImage     = {
+    Unit       = Point(2,3),
+    Enemy      = Point(2,1),
+    Target     = Point(2,1),
+    CustomPawn = "Chess_Pawn_A"
+  }
 }

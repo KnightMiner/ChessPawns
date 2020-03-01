@@ -1,29 +1,41 @@
 local mod = {
-	id = "Knight_Chess",
-	name = "Chess Pawns",
-	version = "1.0.0",
-	requirements = {},
-	icon = "img/icon.png",
-	modApiVersion = "2.4.1",
-	config = {
-		rookRockThrow = true
-	}
+  id = "Knight_Chess",
+  name = "Chess Pawns",
+  version = "1.0.0",
+  requirements = {},
+  icon = "img/icon.png",
+  modApiVersion = "2.4.1",
+  config = {
+    rookRockThrow = true
+  }
 }
 
+--[[--
+  Helper function to load mod scripts
+
+  @param  name   Script path relative to mod directory
+]]
+function mod:loadScript(path)
+  return require(self.scriptPath..path)
+end
+
 function mod:metadata()
-	modApi:addGenerationOption(
-		"rookRockThrow",
-		"Rook Rock Throw",
-		"If checked, the rook is allowed to target mountains, throwing a rock instead of a unit",
-		{ enabled = true }
-	)
+  modApi:addGenerationOption(
+    "rookRockThrow",
+    "Rook Rock Throw",
+    "If checked, the rook is allowed to target mountains, throwing a rock instead of a unit",
+    { enabled = true }
+  )
 end
 
 function mod:init()
-	require(self.scriptPath .. "weaponPreview/api")
-	self.modApiExt = require(self.scriptPath .."modApiExt/modApiExt")
-	self.modApiExt:init()
-	local sprites = require(self.scriptPath .. "libs/sprites")
+  -- script init
+  self:loadScript("weaponPreview/api")
+  self.modApiExt = self:loadScript("modApiExt/modApiExt")
+  self.modApiExt:init()
+
+  -- load sprites
+  local sprites = self:loadScript("libs/sprites")
   sprites.addMechs(
     {
       Name = "chess_king",
@@ -65,56 +77,61 @@ function mod:init()
       Death =             { PosX = -12, PosY = 0, NumFrames = 5, Time = 0.09, Loop = false },
       Icon =              {},
     }
-	)
-	sprites.addSprite("chess_castle_charge",   "weapons")
-	sprites.addSprite("chess_knight_stomp",    "weapons")
-	sprites.addSprite("chess_spawn_pawn",      "weapons")
-	sprites.addSprite("chess_shotup_pawn",     "effects")
-	sprites.addSprite("chess_shotup_pawn_alt", "effects")
+  )
+  sprites.addSprite("chess_castle_charge",   "weapons")
+  sprites.addSprite("chess_knight_stomp",    "weapons")
+  sprites.addSprite("chess_spawn_pawn",      "weapons")
+  sprites.addSprite("chess_shotup_pawn",     "effects")
+  sprites.addSprite("chess_shotup_pawn_alt", "effects")
 
-	local texts = require(self.scriptPath.."weapon_texts")
-	modApi:addWeapon_Texts(texts)
-	require(self.scriptPath.."tile_texts")
-	require(self.scriptPath.."skills/king")
-	require(self.scriptPath.."skills/knight")
-	require(self.scriptPath.."skills/rook")
-	require(self.scriptPath.."skills/pawn")
-	require(self.scriptPath.."pawns")
+  -- texts
+  local texts = require(self.scriptPath.."weapon_texts")
+  modApi:addWeapon_Texts(texts)
+  self:loadScript("tile_texts")
 
-	self.shop = require(self.scriptPath .."libs/shop")
-	self.shop:addWeapon({
-		id = "Chess_Knight_Smite",
-		name = texts.Chess_Knight_Smite_Name,
-		desc = "Adds Knight Smite to the store."
-	})
-	self.shop:addWeapon({
-		id = "Chess_Castle_Charge",
-		name = texts.Chess_Castle_Charge_Name,
-		desc = "Adds Castle Charge to the store."
-	})
-	self.shop:addWeapon({
-		id = "Chess_Spawn_Pawn",
-		name = texts.Chess_Spawn_Pawn_Name,
-		desc = "Adds Spawn Pawn to the store."
-	})
+  -- core content
+  self:loadScript("skills/king")
+  self:loadScript("skills/knight")
+  self:loadScript("skills/rook")
+  self:loadScript("skills/pawn")
+  self:loadScript("pawns")
+
+  -- shop
+  self.shop = self:loadScript("libs/shop")
+  self.shop:addWeapon({
+    id = "Chess_Knight_Smite",
+    name = texts.Chess_Knight_Smite_Name,
+    desc = "Adds Knight Smite to the store."
+  })
+  self.shop:addWeapon({
+    id = "Chess_Castle_Charge",
+    name = texts.Chess_Castle_Charge_Name,
+    desc = "Adds Castle Charge to the store."
+  })
+  self.shop:addWeapon({
+    id = "Chess_Spawn_Pawn",
+    name = texts.Chess_Spawn_Pawn_Name,
+    desc = "Adds Spawn Pawn to the store."
+  })
 end
 
 function mod:load(options,version)
-	-- load libraries
-	self.modApiExt:load(self, options, version)
-	self.shop:load(options)
-	require(self.scriptPath .. "libs/trait"):load()
-	require(self.scriptPath .. "weaponPreview/api"):load()
+  -- load libraries
+  self.modApiExt:load(self, options, version)
+  self.shop:load(options)
+  self:loadScript("libs/trait"):load()
+  self:loadScript("weaponPreview/api"):load()
 
-	-- add mech squad
-	modApi:addSquad(
-		{ "Chess Pawns", "Chess_Knight", "Chess_Rook", "Chess_King" },
-		"Chess Pawns",
-		"These mech employ unusual weapons and unique movement patterns.",
-		self.resourcePath.."img/icon.png"
-	)
-	-- copy config over
-	self.config.rookRockThrow = options.rookRockThrow.enabled
+  -- add mech squad
+  modApi:addSquad(
+    { "Chess Pawns", "Chess_Knight", "Chess_Rook", "Chess_King" },
+    "Chess Pawns",
+    "These mech employ unusual weapons and unique movement patterns.",
+    self.resourcePath.."img/icon.png"
+  )
+  
+  -- copy config over
+  self.config.rookRockThrow = options.rookRockThrow.enabled
 end
 
 return mod
