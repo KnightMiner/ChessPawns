@@ -8,9 +8,9 @@ return {
 	Chess_Knight_Smite_B_UpgradeDescription = "Reduces self damage by 1.",
 
 	Chess_Castle_Charge_Name = "Castle Charge",
-	Chess_Castle_Charge_Description = "Fly in a line and slam into a target, tossing it behind you.",
-	Chess_Castle_Charge_Upgrade1 = "Throw Range",
-	Chess_Castle_Charge_A_UpgradeDescription = "Target is tossed to the mech's original position instead of behind you.",
+	Chess_Castle_Charge_Description = "Fly in a line and slam into a target, tossing it where you started.",
+	Chess_Castle_Charge_Upgrade1 = "Push",
+	Chess_Castle_Charge_A_UpgradeDescription = "Pushes units to the sides of where the target lands.",
 	Chess_Castle_Charge_Upgrade2 = "+2 Damage",
 	Chess_Castle_Charge_B_UpgradeDescription = "Increases damage to by 2.",
 

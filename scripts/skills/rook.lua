@@ -103,22 +103,28 @@ Chess_Castle_Charge = Skill:new {
   UpgradeCost = {1, 3},
 	-- settings
   Damage = 1,
-  Toss = false,
+  Push = false,
 	-- effects
   Icon = "weapons/chess_castle_charge.png",
 	LaunchSound = "/weapons/charge",
 	ImpactSound = "/weapons/charge_impact",
   -- visual
   TipImage = {
-		Unit = Point(2,4),
-		Enemy = Point(2,1),
-		Target = Point(2,1)
+		Unit   = Point(2,3),
+		Enemy  = Point(2,0),
+		Target = Point(2,0)
 	}
 }
 
 -- Upgrade 1: Toss upgrade
 Chess_Castle_Charge_A = Chess_Castle_Charge:new {
-  ThrowRange = true
+  Push = true,
+  TipImage = {
+		Unit   = Point(2,2),
+		Enemy  = Point(2,0),
+		Enemy2 = Point(1,2),
+		Target = Point(2,0)
+  }
 }
 
 -- Upgrade 2: Damage upgrade
@@ -127,8 +133,8 @@ Chess_Castle_Charge_B = Chess_Castle_Charge:new {
 }
 
 -- Both upgrades
-Chess_Castle_Charge_AB = Chess_Castle_Charge:new {
-  ThrowRange = true,
+Chess_Castle_Charge_AB = Chess_Castle_Charge_A:new {
+  Push = true,
   Damage = 3
 }
 
@@ -220,8 +226,9 @@ end
 --- Flip the target over ourselves
 function Chess_Castle_Charge:GetSkillEffect(p1, p2)
 	local ret = SkillEffect()
-	local dirVec = DIR_VECTORS[GetDirection(p2 - p1)]
-  local path = PATH_PROJECTILE
+	local dir = GetDirection(p2 - p1)
+	local dirVec = DIR_VECTORS[dir]
+	local path = PATH_PROJECTILE
 	local target = GetProjectileEnd(p1, p2, path)
 
   local doDamage = true
@@ -248,7 +255,7 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
     -- if no upgrade or we did not move, target lands behind us
     -- upgraded lands the target where we started
     local landing
-    if self.ThrowRange and moved then
+    if moved then
       landing = p1
     else
       landing = newPos - dirVec
@@ -289,6 +296,18 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
       previewer:AddDamage(SpaceDamage(target, self.Damage))
       -- add damage using a script, so it does not show in preview
       ret:AddScript("Chess_Castle_Charge:ScriptDamage("..landing:GetString()..","..self.Damage..")")
+    end
+
+    -- push to either side
+    if self.Push then
+      local sideDir = (dir + 1) % 4
+      local push = SpaceDamage(landing + DIR_VECTORS[sideDir], 0, sideDir)
+      push.sAnimation = "airpush_"..sideDir
+      ret:AddDamage(push)
+      sideDir = (dir - 1) % 4
+      push = SpaceDamage(landing + DIR_VECTORS[sideDir], 0, sideDir)
+      push.sAnimation = "airpush_"..sideDir
+      ret:AddDamage(push)
     end
   end
 
