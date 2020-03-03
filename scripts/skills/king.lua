@@ -116,12 +116,13 @@ Chess_Spawn_Pawn_B = Chess_Spawn_Pawn:new {
   Deployed    = "Chess_Pawn_B",
   DeployedAlt = "Chess_Pawn_B_Alt",
   TipImage = {
-    Unit          = Point(1,3),
-    Target        = Point(1,1),
-    Enemy         = Point(2,1),
-    Second_Origin = Point(2,1),
-    Second_Target = Point(1,1),
-    CustomEnemy   = "Firefly1"
+    Unit          = Point(2,3),
+    Target        = Point(2,1),
+    Enemy         = Point(3,1),
+    CustomEnemy   = "Firefly1",
+    Hole          = Point(2,0),
+    Second_Origin = Point(2,3),
+    Second_Target = Point(2,0)
   }
 }
 
