@@ -1,5 +1,6 @@
 local mod = mod_loader.mods[modApi.currentMod]
 local helpers = mod:loadScript("libs/helpers")
+local cutils = mod:loadScript("libs/CUtils")
 local previewer = mod:loadScript("weaponPreview/api")
 
 --[[--
@@ -152,34 +153,6 @@ local PAWN_EXPLODES = {
   Chess_Pawn_AB_Alt = true,
 }
 
---[[--
-  Gets a list of all pawn owners from teh region data.
-  Not super efficient, so cache the value if possible
-
-  @return Map of pawn ID to pawn owner ID
-]]
-local function getPawnOwners()
-  local region = GetCurrentRegion()
-  if type(region) == 'table' then
-    local player = region.player
-    if type(player) == 'table' then
-      local map = player.map_data
-      if type(map) == 'table' then
-        local owners = {}
-        for k, v in pairs(map) do
-          if k:sub(1, 4) == 'pawn' and type(v) == 'table' and v.id and v.owner then
-            owners[v.id] = v.owner
-          end
-        end
-        return owners
-      end
-    end
-  end
-
-  LOG('WARNING: Failed to find owners data for spawn pawn weapon')
-  return {}
-end
-
 -- default pawn color for tooltips or if we cannot find the mech color
 local DEFAULT_COLOR = 3
 
@@ -220,50 +193,46 @@ end
 function Chess_Spawn_Pawn:GetSkillEffect(p1, target)
   local ret = SkillEffect()
 
-  -- skip running in the tooltip world as there is no proper region, plus only one pawn
+  -- if true, we deploy the alternate color pawn
   local deployAlt = false
   local mechId = Pawn:GetId()
-  if not helpers.isTooltip() then
-    -- determine if we need to kill an existing pawn
-    local pawnToBeDestroyed = nil
-    local pawnCount = 0
-    local pawns = extract_table(Board:GetPawns(TEAM_PLAYER))
-    -- in test mech, skip trying to find owner data, assume all pawns are owned by us
-    local testMech = IsTestMechScenario()
-    local owners = not testMech and getPawnOwners()
-    -- simply iterate all pawns
-    for _, pawnId in ipairs(pawns) do
-      -- owner must be this mech
-      if testMech or owners[pawnId] == mechId then
-        -- pawn must be a chess pawn
-        local pawn = Board:GetPawn(Board:GetPawnSpace(pawnId))
-        local pawnColor = CHESS_PAWNS[pawn:GetType()]
-        if pawnColor ~= nil then
-          -- increment found pawns, and store the color to spawn
-          pawnCount = pawnCount + 1
-          deployAlt = pawnColor
-          -- oldest pawn is killed
-          if pawnToBeDestroyed == nil then
-            pawnToBeDestroyed = pawn
-          end
+  -- determine if we need to kill an existing pawn
+  local pawnToBeDestroyed = nil
+  local pawnCount = 0
+  local pawns = extract_table(Board:GetPawns(TEAM_PLAYER))
+  -- simply iterate all pawns
+  for _, pawnId in ipairs(pawns) do
+    -- owner must be this mech, though skip that check in tooltips (owner not fully set)
+    local pawn = Board:GetPawn(pawnId)
+    if helpers.isTooltip() or cutils.GetPawnOwner(pawn) == mechId then
+      -- pawn must be a chess pawn
+      local pawnColor = CHESS_PAWNS[pawn:GetType()]
+      if pawnColor ~= nil then
+        -- increment found pawns, and store the color to spawn
+        pawnCount = pawnCount + 1
+        deployAlt = pawnColor
+        -- oldest pawn is killed
+        if pawnToBeDestroyed == nil then
+          pawnToBeDestroyed = pawn
         end
       end
     end
+  end
 
-    -- if we found 2 pawns, kill the oldest one
-    if pawnCount >= 2 and pawnToBeDestroyed ~= nil then
-      local space = pawnToBeDestroyed:GetSpace()
-      local damage = SpaceDamage(space, DAMAGE_DEATH)
-      damage.sAnimation = "explo_fire1"
-      ret:AddDamage(damage)
-      ret:AddSound("/impact/generic/explosion")
-      ret:AddBounce(space, 3)
+  -- if we found 2 pawns, kill the oldest one
+  -- skip in tooltips, we cap at 2 pawns (at most 2 actions)
+  if not helpers.isTooltip() and pawnCount >= 2 and pawnToBeDestroyed ~= nil then
+    local space = pawnToBeDestroyed:GetSpace()
+    local damage = SpaceDamage(space, DAMAGE_DEATH)
+    damage.sAnimation = "explo_fire1"
+    ret:AddDamage(damage)
+    ret:AddSound("/impact/generic/explosion")
+    ret:AddBounce(space, 3)
 
-      -- damage preview on old pawn for explosions
-      if PAWN_EXPLODES[pawnToBeDestroyed:GetType()] then
-        for dir = DIR_START, DIR_END do
-          previewer:AddDamage(SpaceDamage(space + DIR_VECTORS[dir], 2))
-        end
+    -- damage preview on old pawn for explosions
+    if PAWN_EXPLODES[pawnToBeDestroyed:GetType()] then
+      for dir = DIR_START, DIR_END do
+        previewer:AddDamage(SpaceDamage(space + DIR_VECTORS[dir], 2))
       end
     end
   end
