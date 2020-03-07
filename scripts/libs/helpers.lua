@@ -104,6 +104,17 @@ local function blockType(point)
 end
 
 --[[--
+  Creates a key for a table from a point object.
+  Basically a simplier form of Point:GetString()
+
+  @param point  Point to convert into key
+  @return  Simple string of point
+]]
+local function pointKey(point)
+  return string.format("%s,%s", point.x, point.y)
+end
+
+--[[--
   Gets all target areas in a straight line
 
   @param move    Maximum spaces to move
@@ -111,7 +122,8 @@ end
   @return  PointList of available points
 ]]
 function helpers.getTargetLine(start, speed, extra)
-  local points = PointList()
+  -- using a hash so we can skip duplicates
+  local points = {}
 
   -- move in all four directions
   for dir = DIR_START, DIR_END do
@@ -125,7 +137,7 @@ function helpers.getTargetLine(start, speed, extra)
 
       -- free spaces means we we keep this
       if lineType == FREE then
-        points:push_back(linePoint)
+        points[pointKey(linePoint)] = linePoint
 
         -- extra means extend off sides
         if extra > 0 then
@@ -139,7 +151,7 @@ function helpers.getTargetLine(start, speed, extra)
 
               -- free means add point
               if sideType == FREE then
-                points:push_back(sidePoint)
+                points[pointKey(sidePoint)] = sidePoint
               end
             end
           end
@@ -148,7 +160,12 @@ function helpers.getTargetLine(start, speed, extra)
     end
   end
 
-  return points
+  -- convert to a list, note the keys are the points
+  local list = PointList()
+  for _,point in pairs(points) do
+    list:push_back(point)
+  end
+  return list
 end
 
 return helpers
