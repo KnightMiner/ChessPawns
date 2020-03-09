@@ -1,6 +1,6 @@
 
 ---------------------------------------------------------------------
--- Trait v1.2 - code library
+-- Trait v1.2a - code library
 ---------------------------------------------------------------------
 -- add a trait description and icon to the tooltip of a unit type.
 -- max one per unit type, and should only be used for unit types created
@@ -11,6 +11,7 @@
 --
 -- v1.1: streamlined and removed functionality that was beyond scope (tutorial tips).
 -- v1.2: removed getModUtils lib dependency.
+-- v1.2a: Modified to allow specifying the glow icon
 
 local mod = mod_loader.mods[modApi.currentMod]
 local path = mod.resourcePath
@@ -81,8 +82,9 @@ function this:Add(input)
   local path = "combat/icons/icon_".. id .. ".png"
   local pathGlow = "combat/icons/icon_".. id .. "_glow.png"
   local file_icon = icon[1]
-  local file_icon_glow = icon[1]:sub(1, -5) .."_glow.png"
-  local icon_offset = icon[2]
+  local has_glow = #icon > 2
+  local file_icon_glow = has_glow and icon[2] or icon[1]:sub(1, -5) .."_glow.png"
+  local icon_offset = has_glow and icon[3] or icon[2]
   local is_vanilla_asset = file_icon:find("^img/")
 
   if is_vanilla_asset then

@@ -1,8 +1,17 @@
 local mod = mod_loader.mods[modApi.currentMod]
 local config = mod.config
+local trait = mod:loadScript("libs/trait")
 local helpers = mod:loadScript("libs/helpers")
 local cutils = mod:loadScript("libs/CUtils")
 local previewer = mod:loadScript("weaponPreview/api")
+
+-- Move tooltip --
+trait:Add{
+  PawnTypes = { "Chess_Rook" },
+  Icon = { "img/combat/icons/icon_rook_move.png", "img/combat/icons/icon_empty_glow.png", Point(0,8) },
+  Description = {"Rook Movement", "The rook can move up to 7 spaces in a single direction. If his move speed is greater than 7, he can use the extra in a second direction."},
+  HideIcon = true
+}
 
 --[[--
   Rook Move: any number of spaces in a straight line

@@ -85,11 +85,17 @@ function mod:init()
       Icon =              {},
     }
   )
-  sprites.addSprite("chess_castle_charge",   "weapons")
-  sprites.addSprite("chess_knight_stomp",    "weapons")
-  sprites.addSprite("chess_spawn_pawn",      "weapons")
-  sprites.addSprite("chess_shotup_pawn",     "effects")
-  sprites.addSprite("chess_shotup_pawn_alt", "effects")
+  sprites.addSprite("chess_castle_charge",    "weapons")
+  sprites.addSprite("chess_knight_stomp",     "weapons")
+  sprites.addSprite("chess_spawn_pawn",       "weapons")
+  sprites.addSprite("chess_shotup_pawn",      "effects")
+  sprites.addSprite("chess_shotup_pawn_alt",  "effects")
+  sprites.addSprite("icon_king_move",         "combat/icons")
+  sprites.addSprite("icon_knight_move",       "combat/icons")
+  sprites.addSprite("icon_rook_move",         "combat/icons")
+  sprites.addSprite("icon_pawn_move",         "combat/icons")
+  sprites.addSprite("icon_pawn_move_explode", "combat/icons")
+  sprites.addSprite("icon_empty_glow",        "combat/icons")
 
   -- texts
   local texts = require(self.scriptPath.."weapon_texts")

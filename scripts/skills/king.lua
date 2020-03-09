@@ -1,7 +1,15 @@
 local mod = mod_loader.mods[modApi.currentMod]
+local trait = mod:loadScript("libs/trait")
 local helpers = mod:loadScript("libs/helpers")
 local cutils = mod:loadScript("libs/CUtils")
 local previewer = mod:loadScript("weaponPreview/api")
+
+-- Move tooltip --
+trait:Add{
+  PawnTypes = { "Chess_King" },
+  Icon = { "img/combat/icons/icon_king_move.png", "img/combat/icons/icon_empty_glow.png", Point(0,8) },
+  Description = {"King Movement", "The king has limited movement, but can move in any of the 8 directions. After the first upgrade, movement upgrades alternate between orthogonal and diagonal."}
+}
 
 --[[--
   Adds all moves extending out in one direction to the object
