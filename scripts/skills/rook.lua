@@ -314,6 +314,7 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
       ret:AddScript(string.format("Chess_Castle_Charge:AddRock(%s)", target:GetString()))
       ret:AddLeap(toss, FULL_DELAY)
       ret:AddBounce(landing, 3)
+      ret:AddSound("/impact/dynamic/rock")
 
       -- add a fake rock for the preview
       local fakeRock = SpaceDamage(landing, 0)
