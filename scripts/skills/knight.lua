@@ -1,15 +1,27 @@
 local mod = mod_loader.mods[modApi.currentMod]
 local config = mod.config
-local trait = mod:loadScript("libs/trait")
-local helpers = mod:loadScript("libs/helpers")
 local cutils = mod:loadScript("libs/CUtils")
+local helpers = mod:loadScript("libs/helpers")
 local previewer = mod:loadScript("weaponPreview/api")
+local tips = mod:loadScript("libs/tutorialTips")
+local trait = mod:loadScript("libs/trait")
 
 -- Move tooltip --
+local HELP_TEXT = "The knight leaps 2 spaces in one direction, then 1 to either side. The first movement upgrade allows leaping 3 spaces in one direction, and later upgrades allow repeating a leap in one direction."
 trait:Add{
   PawnTypes = { "Chess_Knight" },
   Icon = { "img/combat/icons/icon_knight_move.png", "img/combat/icons/icon_empty_glow.png", Point(0,8) },
-  Description = {"Knight Movement", "The knight leaps 2 spaces in one direction, then 1 to either side. The first upgrade allows leaping 3 spaces in one direction, and later upgrades allow repeating the first leap."}
+  Description = {"Knight Movement", HELP_TEXT}
+}
+tips:Add{
+	id = "Knight_Move",
+	title = "Knight Movement",
+	text = HELP_TEXT
+}
+tips:Add{
+	id = "Knight_Attack",
+	title = "Knight Targets",
+	text = "The knight cannot attack units with more health, factoring in armor, ACID, and damage upgrades. The knight also cannot attack shielded units, or units that leave a corpse on death. The knight can target mountains if they are damaged."
 }
 
 --[[--
@@ -128,6 +140,7 @@ Chess_Knight_Move = Move:new {
    6: Knight x3 + threeleaper x2
 ]]
 function Chess_Knight_Move:GetTargetArea(p1)
+  tips:Trigger(self.IsAttack and "Knight_Attack" or "Knight_Move", p1)
   local ret = PointList()
   local move = self.IsAttack and 2 or Pawn:GetMoveSpeed()
   -- add a terrain description for max damage

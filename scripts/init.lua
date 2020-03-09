@@ -33,6 +33,12 @@ function mod:metadata()
     "If checked, Knight Stomp is capped at the units max health. Unchecked means it caps at current health",
     { enabled = false }
   )
+  modApi:addGenerationOption(
+    "resetTutorialTips",
+    "Reset Tutorial Tooltips",
+    "Check to reset all tutorial tooltips for this profile",
+    { enabled = false }
+  )
 end
 
 function mod:init()
@@ -150,6 +156,12 @@ function mod:load(options,version)
   for _, weapon in pairs({"Chess_Castle_Charge", "Chess_Castle_Charge_A", "Chess_Castle_Charge_B", "Chess_Castle_Charge_AB"}) do
     _G[weapon].TipImage = _G[weapon].TipImages[image]
   end
+
+	-- reset tutorial tooltips if checked
+	if options.resetTutorialTips.enabled then
+		self:loadScript("libs/tutorialTips"):ResetAll()
+		options.resetTutorialTips.enabled = false
+	end
 end
 
 return mod

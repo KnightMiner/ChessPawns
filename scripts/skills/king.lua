@@ -1,14 +1,21 @@
 local mod = mod_loader.mods[modApi.currentMod]
-local trait = mod:loadScript("libs/trait")
-local helpers = mod:loadScript("libs/helpers")
 local cutils = mod:loadScript("libs/CUtils")
+local helpers = mod:loadScript("libs/helpers")
 local previewer = mod:loadScript("weaponPreview/api")
+local tips = mod:loadScript("libs/tutorialTips")
+local trait = mod:loadScript("libs/trait")
 
 -- Move tooltip --
+local HELP_TEXT = "The king has limited movement, but can move in any of the 8 directions. The first movement upgrade allows 2 move in any of the 8 directions, later upgrades alternate between orthogonal and diagonal."
 trait:Add{
   PawnTypes = { "Chess_King" },
   Icon = { "img/combat/icons/icon_king_move.png", "img/combat/icons/icon_empty_glow.png", Point(0,8) },
-  Description = {"King Movement", "The king has limited movement, but can move in any of the 8 directions. After the first upgrade, movement upgrades alternate between orthogonal and diagonal."}
+  Description = {"King Movement", HELP_TEXT}
+}
+tips:Add{
+	id = "King_Move",
+	title = "King Movement",
+	text = HELP_TEXT
 }
 
 --[[--
@@ -35,6 +42,7 @@ end
 ]]
 Chess_King_Move = {}
 function Chess_King_Move:GetTargetArea(p1)
+  tips:Trigger("King_Move", p1)
   local ret = PointList()
 
   -- first upgrade increases both, after that only 1 is increased

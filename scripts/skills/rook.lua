@@ -1,15 +1,22 @@
 local mod = mod_loader.mods[modApi.currentMod]
 local config = mod.config
-local trait = mod:loadScript("libs/trait")
-local helpers = mod:loadScript("libs/helpers")
 local cutils = mod:loadScript("libs/CUtils")
+local helpers = mod:loadScript("libs/helpers")
 local previewer = mod:loadScript("weaponPreview/api")
+local tips = mod:loadScript("libs/tutorialTips")
+local trait = mod:loadScript("libs/trait")
 
 -- Move tooltip --
+local HELP_TEXT = "The rook can move up to 7 spaces in a single direction. If the rook's speed is greater than 7, he can use the extra in a second direction."
 trait:Add{
   PawnTypes = { "Chess_Rook" },
   Icon = { "img/combat/icons/icon_rook_move.png", "img/combat/icons/icon_empty_glow.png", Point(0,8) },
-  Description = {"Rook Movement", "The rook can move up to 7 spaces in a single direction. If his move speed is greater than 7, he can use the extra in a second direction."}
+  Description = {"Rook Movement", HELP_TEXT}
+}
+tips:Add{
+	id = "Rook_Move",
+	title = "Rook Movement",
+	text = HELP_TEXT
 }
 
 --[[--
@@ -19,6 +26,7 @@ trait:Add{
 ]]
 Chess_Rook_Move = {}
 function Chess_Rook_Move:GetTargetArea(p1)
+  tips:Trigger("Rook_Move", p1)
   -- rook moves up to 7 in one direction, extra allows a second move on another axis
   local move = Pawn:GetMoveSpeed()
   local extra = 0
