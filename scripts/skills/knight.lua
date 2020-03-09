@@ -9,8 +9,7 @@ local previewer = mod:loadScript("weaponPreview/api")
 trait:Add{
   PawnTypes = { "Chess_Knight" },
   Icon = { "img/combat/icons/icon_knight_move.png", "img/combat/icons/icon_empty_glow.png", Point(0,8) },
-  Description = {"Knight Movement", "The knight leaps 2 spaces in one direction, then 1 to either side. The first upgrade allows leaping 3 spaces in one direction, and later upgrades allow repeating the first leap."},
-  HideIcon = true
+  Description = {"Knight Movement", "The knight leaps 2 spaces in one direction, then 1 to either side. The first upgrade allows leaping 3 spaces in one direction, and later upgrades allow repeating the first leap."}
 }
 
 --[[--

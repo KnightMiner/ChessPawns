@@ -9,8 +9,7 @@ local previewer = mod:loadScript("weaponPreview/api")
 trait:Add{
   PawnTypes = { "Chess_Rook" },
   Icon = { "img/combat/icons/icon_rook_move.png", "img/combat/icons/icon_empty_glow.png", Point(0,8) },
-  Description = {"Rook Movement", "The rook can move up to 7 spaces in a single direction. If his move speed is greater than 7, he can use the extra in a second direction."},
-  HideIcon = true
+  Description = {"Rook Movement", "The rook can move up to 7 spaces in a single direction. If his move speed is greater than 7, he can use the extra in a second direction."}
 }
 
 --[[--
