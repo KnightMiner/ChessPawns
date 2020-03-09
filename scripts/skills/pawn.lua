@@ -6,15 +6,20 @@ local trait = mod:loadScript("libs/trait")
 local HELP_TEXT = "Pawns can move up to 2 spaces in a single direction."
 trait:Add{
   PawnTypes = { "Chess_Pawn", "Chess_Pawn_A", "Chess_Pawn_Alt", "Chess_Pawn_A_Alt" },
-  Icon = { "img/combat/icons/icon_pawn_move.png", "img/combat/icons/icon_empty_glow.png", Point(0,8) },
-  Description = {"Pawn Movement", HELP_TEXT}
+  Icon = "img/combat/icons/icon_pawn_move.png",
+  IconGlow = "img/combat/icons/icon_empty_glow.png",
+  Title = "Pawn Movement",
+  Description = HELP_TEXT
 }
 
 -- Pawn explosions --
 trait:Add{
   PawnTypes = { "Chess_Pawn_B", "Chess_Pawn_AB", "Chess_Pawn_B_Alt", "Chess_Pawn_AB_Alt" },
-  Icon = { "img/combat/icons/icon_pawn_move_explode.png", "img/combat/icons/icon_explode_glow.png", Point(0,8) },
-  Description = {"Explosive Pawn", HELP_TEXT .. "\nThis unit will always explode on death, dealing 2 damage to adjacent tiles."}
+  Icon = "img/combat/icons/icon_pawn_move_explode.png",
+  IconGlow = "img/combat/icons/icon_explode_glow.png",
+  IconOffset = Point(0,8),
+  Title = "Explosive Pawn",
+  Description = HELP_TEXT .. "\nThis unit will always explode on death, dealing 2 damage to adjacent tiles."
 }
 
 --[[--

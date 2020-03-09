@@ -9,9 +9,11 @@ local trait = mod:loadScript("libs/trait")
 -- Move tooltip --
 local HELP_TEXT = "The rook can move up to 7 spaces in a single direction. If the rook's speed is greater than 7, he can use the extra in a second direction."
 trait:Add{
-  PawnTypes = { "Chess_Rook" },
-  Icon = { "img/combat/icons/icon_rook_move.png", "img/combat/icons/icon_empty_glow.png", Point(0,8) },
-  Description = {"Rook Movement", HELP_TEXT}
+  PawnTypes = "Chess_Rook",
+  Icon = "img/combat/icons/icon_rook_move.png",
+  IconGlow = "img/combat/icons/icon_empty_glow.png",
+  Title = "Rook Movement",
+  Description = HELP_TEXT
 }
 tips:Add{
 	id = "Rook_Move",

@@ -8,9 +8,11 @@ local trait = mod:loadScript("libs/trait")
 -- Move tooltip --
 local HELP_TEXT = "The king has limited movement, but can move in any of the 8 directions. The first movement upgrade allows 2 move in any of the 8 directions, later upgrades alternate between orthogonal and diagonal."
 trait:Add{
-  PawnTypes = { "Chess_King" },
-  Icon = { "img/combat/icons/icon_king_move.png", "img/combat/icons/icon_empty_glow.png", Point(0,8) },
-  Description = {"King Movement", HELP_TEXT}
+  PawnTypes = "Chess_King",
+  Icon = "img/combat/icons/icon_king_move.png",
+  IconGlow = "img/combat/icons/icon_empty_glow.png",
+  Title = "King Movement",
+  Description = HELP_TEXT
 }
 tips:Add{
 	id = "King_Move",

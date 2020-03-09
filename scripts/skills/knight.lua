@@ -9,9 +9,11 @@ local trait = mod:loadScript("libs/trait")
 -- Move tooltip --
 local HELP_TEXT = "The knight leaps 2 spaces in one direction, then 1 to either side. The first movement upgrade allows leaping 3 spaces in one direction, and later upgrades allow repeating a leap in one direction."
 trait:Add{
-  PawnTypes = { "Chess_Knight" },
-  Icon = { "img/combat/icons/icon_knight_move.png", "img/combat/icons/icon_empty_glow.png", Point(0,8) },
-  Description = {"Knight Movement", HELP_TEXT}
+  PawnTypes = "Chess_Knight",
+  Icon = "img/combat/icons/icon_knight_move.png",
+  IconGlow = "img/combat/icons/icon_empty_glow.png",
+  Title = "Knight Movement",
+  Description = HELP_TEXT
 }
 tips:Add{
 	id = "Knight_Move",
