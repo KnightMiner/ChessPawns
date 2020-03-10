@@ -234,16 +234,6 @@ function Chess_Castle_Charge:GetTargetArea(start)
 end
 
 --[[--
-  Deals the weapons damage to a target. Used to hide damage from preview
-
-  @param  target  Point target for damage
-  @param  amount  Amount of damage to deal
-]]
-function Chess_Castle_Charge:ScriptDamage(target, amount)
-  Board:DamageSpace(SpaceDamage(target, amount))
-end
-
---[[--
   Spawns in a rock on a mountain, as vanilla does not like spawning units on mountains
 
   @param  space  Point to place the rock
@@ -340,8 +330,10 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
       -- add damage where the target used to be. Used for damage for the weapon preview
       -- if we add damage to the new position, it may show as targeting the attacking mech
       previewer:AddDamage(SpaceDamage(target, self.Damage))
-      -- add damage using a script, so it does not show in preview
-      ret:AddScript("Chess_Castle_Charge:ScriptDamage("..landing:GetString()..","..self.Damage..")")
+      -- real damage, hidden from preview
+      local damage = SpaceDamage(landing, self.Damage)
+      damage.bHide = true
+      ret:AddDamage(damage)
     end
 
     -- push to either side
