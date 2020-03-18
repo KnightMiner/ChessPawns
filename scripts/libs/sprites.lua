@@ -15,6 +15,16 @@ function sprites.addSprite(path, filename)
 end
 
 --[[--
+  Adds sprites for an achievement, adding both unlocked and greyed out
+
+  @param name  Achievement base filename
+]]
+function sprites.addAchievement(name)
+  sprites.addSprite("achievements", name)
+  sprites.addSprite("achievements", name .. "_gray")
+end
+
+--[[--
   Converts a name into a path to a mech sprite
 
   @param name  Mech sprite name

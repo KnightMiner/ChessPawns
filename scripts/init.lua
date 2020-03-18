@@ -44,6 +44,7 @@ end
 function mod:init()
   -- script init
   self:loadScript("weaponPreview/api")
+  self:loadScript("achievements/init")
   if modApiExt then
     self.modApiExt = modApiExt
   else
@@ -106,6 +107,10 @@ function mod:init()
   sprites.addSprite("combat/icons", "icon_pawn_move")
   sprites.addSprite("combat/icons", "icon_pawn_move_explode")
   sprites.addSprite("combat/icons", "icon_empty_glow")
+  sprites.addAchievement("chess_2_clear")
+  sprites.addAchievement("chess_3_clear")
+  sprites.addAchievement("chess_4_clear")
+  sprites.addAchievement("chess_perfect")
 
   -- texts
   local texts = require(self.scriptPath.."weapon_texts")
@@ -118,6 +123,8 @@ function mod:init()
   self:loadScript("skills/rook")
   self:loadScript("skills/pawn")
   self:loadScript("pawns")
+  self:loadScript("achievements")
+  self:loadScript("achievementTriggers"):init()
 
   -- shop
   self.shop = self:loadScript("libs/shop")
