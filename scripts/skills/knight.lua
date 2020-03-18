@@ -145,6 +145,10 @@ function Chess_Knight_Move:GetTargetArea(p1)
   tips:Trigger(self.IsAttack and "Knight_Attack" or "Knight_Move", p1)
   local ret = PointList()
   local move = self.IsAttack and 2 or Pawn:GetMoveSpeed()
+  if move < 1 then
+    return ret
+  end
+
   -- add a terrain description for max damage
   local maxDamage = 0
   if self.IsAttack then
