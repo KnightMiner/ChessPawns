@@ -44,8 +44,12 @@ end
 function mod:init()
   -- script init
   self:loadScript("weaponPreview/api")
-  self.modApiExt = self:loadScript("modApiExt/modApiExt")
-  self.modApiExt:init()
+  if modApiExt then
+    self.modApiExt = modApiExt
+  else
+    self.modApiExt = self:loadScript("modApiExt/modApiExt")
+    self.modApiExt:init()
+  end
 
   -- load sprites
   local sprites = self:loadScript("libs/sprites")
