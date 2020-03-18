@@ -4,24 +4,44 @@ local mod = mod_loader.mods[modApi.currentMod]
 --[[--
   Adds a sprite to the game
 
-  @param filename  File to add
   @param path      Base sprite path
+  @param filename  File to add
 ]]
-function sprites.addSprite(filename, path)
+function sprites.addSprite(path, filename)
   modApi:appendAsset(
     string.format("img/%s/%s.png", path, filename),
     string.format("%simg/%s/%s.png", mod.resourcePath, path, filename)
   )
 end
 
---[[
+--[[--
   Converts a name into a path to a mech sprite
 
   @param name  Mech sprite name
   @return  Sprite path
 ]]
-local function mechPath(name)
-  return string.format("units/player/%s.png", name)
+local function spritePath(path, name)
+  return string.format("%s/%s.png", path, name)
+end
+
+--[[--
+  Adds a sprite animations
+
+  @param path      Base sprite path
+  @param name      Animation name and filename
+  @param settings  Animation settings, such as positions and frametime
+]]
+function sprites.addAnimation(path, name, settings)
+  sprites.addSprite(path, name)
+  settings = settings or {}
+  settings.Image = spritePath(path, name)
+
+  -- base animation is passed in settings
+  local base = settings.Base or "Animation"
+  settings.Base = nil
+
+  -- create the animation
+  ANIMS[name] = ANIMS[base]:new(settings)
 end
 
 --[[
@@ -34,16 +54,16 @@ end
 ]]
 local function addMechAnim(name, object, suffix, fileSuffix)
   if object then
-  -- default fileSuffix to the animation suffix
-  fileSuffix = fileSuffix or suffix
+    -- default fileSuffix to the animation suffix
+    fileSuffix = fileSuffix or suffix
 
-  -- add the sprite to the resource list
-  local filename = name .. fileSuffix
-  sprites.addSprite(filename, "units/player")
+    -- add the sprite to the resource list
+    local filename = name .. fileSuffix
+    sprites.addSprite("units/player", filename)
 
-  -- add the mech animation to the animation list
-  object.Image = mechPath(filename)
-  ANIMS[name..suffix] = ANIMS.MechUnit:new(object);
+    -- add the mech animation to the animation list
+    object.Image = spritePath("units/player", filename)
+    ANIMS[name..suffix] = ANIMS.MechUnit:new(object);
   end
 end
 
@@ -67,14 +87,14 @@ function sprites.addMechs(...)
     -- icon actually uses 2 images, and uses a different object type
     if object.Icon then
       -- firstly, we have the extra hanger sprite
-      sprites.addSprite(name .. "_h", "units/player")
+      sprites.addSprite("units/player", name .. "_h")
 
       -- add the regular no shadow sprite
       local iconname = name .. "_ns"
-      sprites.addSprite(iconname, "units/player")
+      sprites.addSprite("units/player", iconname)
 
       -- second, we use MechIcon instead of MechUnit
-      object.Icon.Image = mechPath(iconname)
+      object.Icon.Image = spritePath("units/player", iconname)
       ANIMS[iconname] = ANIMS.MechIcon:new(object.Icon);
     end
   end
