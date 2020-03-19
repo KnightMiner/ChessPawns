@@ -1,3 +1,4 @@
+--- This file contains mod specific helper functions, copy only specific utilities if any are useful
 local helpers = {}
 
 --- Cached point for the tooltip board size
@@ -155,6 +156,23 @@ function helpers.getTargetLine(start, speed, extra)
     list:push_back(point)
   end
   return list
+end
+
+--- Map of pawn name to boolean if they explode
+local PAWN_EXPLODES = {
+  Chess_Pawn_B      = true,
+  Chess_Pawn_B_Alt  = true,
+  Chess_Pawn_AB     = true,
+  Chess_Pawn_AB_Alt = true,
+}
+
+--[[--
+  Checks if a given pawn is an exploding chess pawn
+
+  @param pawnType  Type of the pawn to check
+]]
+function helpers.pawnExplodes(pawnType)
+  return PAWN_EXPLODES[pawnType]
 end
 
 return helpers

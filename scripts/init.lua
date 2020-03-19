@@ -111,6 +111,9 @@ function mod:init()
   sprites.addAchievement("chess_3_clear")
   sprites.addAchievement("chess_4_clear")
   sprites.addAchievement("chess_perfect")
+  sprites.addAchievement("chess_repositioning")
+  sprites.addAchievement("chess_pawn_grenade")
+  sprites.addAchievement("chess_one_shot")
 
   -- texts
   local texts = require(self.scriptPath.."weapon_texts")

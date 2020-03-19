@@ -1,4 +1,5 @@
 local mod = mod_loader.mods[modApi.currentMod]
+local achvTrigger = mod:loadScript("achievementTriggers")
 local helpers = mod:loadScript("libs/helpers")
 local trait = mod:loadScript("libs/trait")
 
@@ -65,3 +66,15 @@ Chess_Pawn_Spear_A = Chess_Pawn_Spear:new {
     CustomPawn = "Chess_Pawn_A"
   }
 }
+
+--- Override to increment achievement pushes
+local originalSkillEffect = Prime_Spear.GetSkillEffect
+function Chess_Pawn_Spear:GetSkillEffect(p1, p2)
+  local ret = originalSkillEffect(self, p1, p2)
+  local direction = GetDirection(p2 - p1)
+
+  -- increment pushes for achievement
+  achvTrigger:checkReposition(ret, p2, direction)
+
+  return ret
+end

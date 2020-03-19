@@ -1,5 +1,6 @@
 local mod = mod_loader.mods[modApi.currentMod]
 local config = mod.config
+local achvTrigger = mod:loadScript("achievementTriggers")
 local cutils = mod:loadScript("libs/CUtils")
 local helpers = mod:loadScript("libs/helpers")
 local previewer = mod:loadScript("weaponPreview/api")
@@ -311,6 +312,20 @@ Chess_Knight_Smite_AB = Chess_Knight_Smite_A:new {
 function Chess_Knight_Smite:Squash(target, selfDamage)
   -- move the mech out of the way so it does not die
   Pawn:SetSpace(Point(-1,-1))
+
+  -- if attacking a pawn, check if its a boss pawn for achievement
+  if achvTrigger:available("one_shot") and Board:IsPawnSpace(target) then
+    -- must be at max health
+    local pawn = Board:GetPawn(target)
+    if pawn:GetHealth() == cutils.GetPawnMaxHealth(pawn) then
+      -- must be a boss, but skip blobs and swarmers as they are too easy to kill
+      local type = pawn:GetType()
+      if type ~= "BlobBoss" and type ~= "lmn_SpitterBoss" and _G[type].Tier == TIER_BOSS then
+        achvTrigger:trigger("one_shot")
+      end
+    end
+  end
+
   Board:DamageSpace(SpaceDamage(target, DAMAGE_DEATH))
 
   -- move the mech back, then self damage
@@ -358,9 +373,13 @@ function Chess_Knight_Smite:GetSkillEffect(p1, p2)
   -- push effect on land
   if self.Push then
     for dir = DIR_START, DIR_END do
-      local damage = SpaceDamage(p2 + DIR_VECTORS[dir], 0, dir)
+      -- actual push
+      local point = p2 + DIR_VECTORS[dir]
+      local damage = SpaceDamage(point, 0, dir)
       damage.sAnimation = PUSH_ANIMS[dir]
       ret:AddDamage(damage)
+      -- increment pushes for achievement
+      achvTrigger:checkReposition(ret, point, dir)
     end
   end
 

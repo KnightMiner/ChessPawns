@@ -1,5 +1,6 @@
 local mod = mod_loader.mods[modApi.currentMod]
 local config = mod.config
+local achvTrigger = mod:loadScript("achievementTriggers")
 local cutils = mod:loadScript("libs/CUtils")
 local helpers = mod:loadScript("libs/helpers")
 local previewer = mod:loadScript("weaponPreview/api")
@@ -258,6 +259,58 @@ function Chess_Castle_Charge:AddRock(space)
   end
 end
 
+--[[--
+  Checks if the given damage is enough to kill a pawn
+
+  @param point   Pawn location
+  @param amount  Amount of damage to deal
+  @return  True if the amount of damage is enough to kill this pawn
+]]
+local function willDamageKill(pawn, amount)
+  -- ice and shield always takes 2 hits to break
+  if pawn:IsFrozen() or pawn:IsShield() then
+    return false
+  end
+
+  -- ACID and health will affect the killing
+  local health = pawn:GetHealth()
+  if pawn:IsAcid() then
+    amount = amount * 2
+  -- note this returns true even if acid
+  elseif pawn:IsArmor() then
+    health = health + 1
+  end
+
+  return health <= amount
+end
+
+--[[--
+  Checks if the current charge attack would trigger the achievement
+
+  @param point  Point the pawn lands
+]]
+function Chess_Castle_Charge:CheckAchievement(point)
+  local pawn = Board:GetPawn(point)
+
+  -- ensure the space has an exploding pawn
+  if pawn ~= nil and helpers.pawnExplodes(pawn:GetType()) then
+    -- count how many enemies will be killed
+    local kills = 0
+    for dir = DIR_START, DIR_END do
+      local offset = point + DIR_VECTORS[dir]
+      if Board:IsPawnSpace(offset) and Board:IsPawnTeam(offset, TEAM_ENEMY)
+          and willDamageKill(Board:GetPawn(offset), 2) then
+        kills = kills + 1
+      end
+    end
+
+    -- if we killed at least 2 enemies, grant achievement
+    if kills >= 2 then
+      achvTrigger:trigger("pawn_grenade")
+    end
+  end
+end
+
 --- Flip the target over ourselves
 function Chess_Castle_Charge:GetSkillEffect(p1, p2)
   local ret = SkillEffect()
@@ -327,6 +380,14 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
       -- otherwise its a pawn, toss the unit
       ret:AddLeap(toss, FULL_DELAY)
       ret:AddBounce(landing, 3)
+
+      -- check the achievement
+      if achvTrigger:available("pawn_grenade") then
+        ret:AddScript(string.format("Chess_Castle_Charge:CheckAchievement(%s)", landing:GetString()))
+      end
+      -- increment pushes for achievement
+      achvTrigger:checkReposition(ret, target)
+
       -- add damage where the target used to be. Used for damage for the weapon preview
       -- if we add damage to the new position, it may show as targeting the attacking mech
       previewer:AddDamage(SpaceDamage(target, self.Damage))
@@ -340,9 +401,12 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
     if self.Push then
       for i = -1, 1, 2 do
         local sideDir = (dir + i) % 4
-        local push = SpaceDamage(landing + DIR_VECTORS[sideDir], 0, sideDir)
+        local point = landing + DIR_VECTORS[sideDir]
+        local push = SpaceDamage(point, 0, sideDir)
         push.sAnimation = "airpush_"..sideDir
         ret:AddDamage(push)
+        -- increment pushes for achievement
+        achvTrigger:checkReposition(ret, point, sideDir)
       end
     end
   end

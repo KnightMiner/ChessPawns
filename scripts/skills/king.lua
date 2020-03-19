@@ -165,14 +165,6 @@ local CHESS_PAWNS = {
   Chess_Pawn_AB_Alt = false,
 }
 
--- true if the pawn type explodes
-local PAWN_EXPLODES = {
-  Chess_Pawn_B      = true,
-  Chess_Pawn_B_Alt  = true,
-  Chess_Pawn_AB     = true,
-  Chess_Pawn_AB_Alt = true,
-}
-
 -- default pawn color for tooltips or if we cannot find the mech color
 local DEFAULT_COLOR = 3
 
@@ -250,7 +242,7 @@ function Chess_Spawn_Pawn:GetSkillEffect(p1, target)
     ret:AddBounce(space, 3)
 
     -- damage preview on old pawn for explosions
-    if PAWN_EXPLODES[pawnToBeDestroyed:GetType()] then
+    if helpers.pawnExplodes(pawnToBeDestroyed:GetType()) then
       for dir = DIR_START, DIR_END do
         previewer:AddDamage(SpaceDamage(space + DIR_VECTORS[dir], 2))
       end
@@ -271,7 +263,7 @@ function Chess_Spawn_Pawn:GetSkillEffect(p1, target)
   ret:AddArtillery(damage, deployAlt and self.ProjectileAlt or self.Projectile)
 
   -- if targeting water with an explosive pawn, preview that explosion
-  if PAWN_EXPLODES[pawnType] and Board:IsBlocked(target, PATH_GROUND) then
+  if helpers.pawnExplodes(pawnType) and Board:IsBlocked(target, PATH_GROUND) then
     previewer:AddDamage(SpaceDamage(target, 2))
     for dir = DIR_START, DIR_END do
       previewer:AddDamage(SpaceDamage(target + DIR_VECTORS[dir], 2))
