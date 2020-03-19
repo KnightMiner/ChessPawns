@@ -19,7 +19,7 @@ local function deathEffect(self, p1)
 end
 
 --[[--
-  Sets up animations for the given pawn type. Safe to call multiple times for a pawn
+  Sets up animations for the given pawn type. Safe to call multiple times for a pawn, but needs to be called after pawns are loaded
 
   @param type   Pawn type
   @param image  Image path to prevents fadeout over problematic tiles. If provided, should be the same as the pawn's stationary image, except with a second blank frame.
@@ -77,6 +77,13 @@ function createDiagonalPawnAnimation(point)
   Board:AddPawn(pawn, point)
 end
 
+--- Temporary workaround until the cutils fix is merged to make Pawn:SetFire(true) not affect the board
+function setDiagonalPawnFire()
+  if not Pawn:IsFire() then
+    cutils.SetPawnFire(Pawn, true)
+  end
+end
+
 --[[--
   Script function to remove a item from the board and move the pawn to that place.
   Assumes the item is stored to restore it later
@@ -117,7 +124,7 @@ function diagonal.addStep(ret, point)
     ret:AddScript(string.format("removeDiagonalItem(%s)", point:GetString()))
 
   -- on tiles where we might interact with the board, add a fake pawn for animation
-  elseif Board:IsPod(point) or Board:IsAcid(point) or Board:IsFire(point) then
+  elseif Board:IsPod(point) or Board:IsAcid(point) or Board:IsFire(point) or (Pawn:IsFire() and Board:GetTerrain(point) == TERRAIN_FOREST) then
     ret:AddScript(string.format("createDiagonalPawnAnimation(%s)", point:GetString()))
   else
     -- anywhere else directly to the space
@@ -153,14 +160,19 @@ function diagonal.addMove(ret, p1, p2)
   -- add sound effect
   local pawnType = Pawn:GetType()
   ret:AddSound(_G[pawnType].SoundLocation .. "move")
+  ret:AddDelay(0.1)
 
   -- distance of 1 has less work to do
+  local wasFire = false
   if distance > 1 then
     -- normalize the offset to be distance of 1
     offset = Point(offset.x / distance, offset.y / distance)
 
     -- prepare the animation
     diagonal.setColor()
+
+    -- store fire as traveling through water may accidently unset it
+    wasFire = Pawn:IsFire()
 
     -- iterate through points in the path, steping to each point
     local point = p1 + offset
@@ -172,6 +184,11 @@ function diagonal.addMove(ret, p1, p2)
 
   -- move the actual pawn
   ret:AddScript(string.format("Pawn:SetSpace(%s)", p2:GetString()))
+
+  -- restore fire if needed
+  if wasFire then
+    ret:AddScript("setDiagonalPawnFire()")
+  end
 
   -- add a normal move so it shows up in the tooltip
   ret:AddTeleport(p1, p2, NO_DELAY)
