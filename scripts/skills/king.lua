@@ -1,5 +1,6 @@
 local mod = mod_loader.mods[modApi.currentMod]
 local cutils = mod:loadScript("libs/CUtils")
+local diagonal = mod:loadScript("libs/diagonalMove")
 local helpers = mod:loadScript("libs/helpers")
 local previewer = mod:loadScript("weaponPreview/api")
 local tips = mod:loadScript("libs/tutorialTips")
@@ -75,9 +76,10 @@ end
 function Chess_King_Move:GetSkillEffect(p1, p2)
   local ret = SkillEffect()
 
-  -- if not a straight line, need to leap
-  if p1.x ~= p2.x and p1.y ~= p2.y then
-    helpers.addLeap(ret, p1, p2)
+  -- in diagonal line? use diagonal move util
+  local offset = p2 - p1
+  if math.abs(offset.x) == math.abs(offset.y) then
+    diagonal.addMove(ret, p1, p2)
   else
     ret:AddMove(Board:GetPath(p1, p2, Pawn:GetPathProf()), FULL_DELAY)
   end

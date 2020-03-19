@@ -126,6 +126,10 @@ function mod:init()
   self:loadScript("achievements")
   self:loadScript("achievementTriggers"):init()
 
+  -- diagonal pawn animations
+  local diagonal = self:loadScript("libs/diagonalMove")
+  diagonal.setupAnimations("Chess_King", "units/player/chess_king_diagonal")
+
   -- shop
   self.shop = self:loadScript("libs/shop")
   self.shop:addWeapon({
