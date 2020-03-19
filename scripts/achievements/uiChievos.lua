@@ -179,7 +179,7 @@ local function createUi()
 		end
 		
 		local function addChievo(i, mod, chievo)
-			local surface = sdlext.surface(chievo.GetStatus() and chievo.img or chievo.img_gray)
+			local surface = sdlext.surface(chievo.GetImg and chievo:GetImg() or chievo.GetStatus() and chievo.img or chievo.img_gray)
 			local surface_gray = sdlext.surface(chievo.img_gray)
 			
 			-- row 0-n; col 0-n

@@ -89,7 +89,7 @@
 	----------+---------+-------------------
 	
 	
-	achvApi:GetChievoStatus(chievoId)
+	achvApi:IsChievoCompleted(chievoId)
 	=================================
 	returns true if achievement has been completed, otherwise false.
 	
@@ -329,9 +329,15 @@ function this:AddChievo(chievo)
 	initChievos(self)
 	table.insert(lmn_achievements.chievos[mod.id], chievo)
 	
-	chievo.TriggerChievo = function(flag) self:TriggerChievo(chievo.id, flag) end
-	chievo.GetStatus = function() return self:GetChievoStatus(chievo.id) end
+	chievo.Trigger =  function(flag) self:TriggerChievo(chievo.id, flag) end
+	chievo.Reset = function() return self:TriggerChievo(chievo.id, false) end
+	chievo.IsCompleted = function() return self:IsChievoCompleted(chievo.id) end
 	chievo.GetTip = function(reset) return self:GetChievoTipFormatted(chievo.id, reset) end
+	chievo.GetProgress = function() return self:GetChievoProgress(chievo.id) end
+	
+	-- deprecated
+	chievo.TriggerChievo = chievo.Trigger
+	chievo.GetStatus = chievo.IsCompleted
 end
 
 -- sets an achievement to complete, or incomplete if flag is false.
@@ -340,15 +346,16 @@ end
 function this:TriggerChievo(chievoId, flag)
 	assert(type(chievoId) == 'string')
 	
+	local chievo = self:GetChievo(chievoId)
+	
 	if flag ~= false then
-		if self:GetChievoStatus(chievoId) then return end	-- don't trigger completed achievements.
+		if self:IsChievoCompleted(chievoId) then return end	-- don't trigger completed achievements.
 		if IsTestMechScenario() then return end				-- don't trigger achievements when testing mech.
 		
 		-- if achievement has sub-objectives.
 		if type(flag) == 'table' then
 			local progress = flag
 			local completed = true
-			local chievo = self:GetChievo(chievoId)
 			assert(type(chievo.objective) == 'table')
 			
 			-- go through all objectives, add to progress, and check if completed.
@@ -367,7 +374,16 @@ function this:TriggerChievo(chievoId, flag)
 	
 	-- set achievement completion status.
 	flag = flag ~= false and true or nil
-	writeData(chievoId, flag)
+	writeData(chievo.id, flag)
+	
+	if chievo.objective then
+		for id, v in pairs(chievo.objective) do
+			if not flag then
+				v = type(v) == 'number' and 0 or nil
+			end
+			writeData(chievo.id .."_".. id, v)
+		end
+	end
 end
 
 -- sets all achievements to complete, or nil if flag is false.
@@ -387,8 +403,16 @@ function this:TriggerAll(flag)
 	end
 end
 
+function this:ResetChievo(chievoId)
+	self:TriggerChievo(chievoId, false)
+end
+
+function this:ResetAll()
+	self:TriggerAll(false)
+end
+
 -- returns true if achievement is completed, or false otherwise.
-function this:GetChievoStatus(chievoId)
+function this:IsChievoCompleted(chievoId)
 	assert(type(chievoId) == 'string')
 	
 	return readData(chievoId)
@@ -416,6 +440,24 @@ function this:IsChievoProgress(chievoId, objectives)
 	return complete
 end
 
+function this:GetChievoProgress(chievoId)
+	assert(type(chievoId) == 'string')
+	
+	local chievo = self:GetChievo(chievoId)
+	
+	if chievo.objective then
+		local result = {}
+		
+		for objId, _ in pairs(chievo.objective) do
+			result[objId] = readData(chievo.id .."_".. objId)
+		end
+		
+		return result
+	else
+		return chievo.IsCompleted()
+	end
+end
+
 -- trigger a custom unlock text.
 function this:ToastUnlock(chievo)
 	assert(type(chievo) == 'table')
@@ -427,5 +469,8 @@ function this:ToastUnlock(chievo)
 	chievo.GetTip = function() return chievo.tip end
 	toast:Add(chievo)
 end
+
+-- deprecated
+this.GetChievoStatus = this.IsChievoCompleted
 
 return this

@@ -17,11 +17,18 @@ end
 --[[--
   Adds sprites for an achievement, adding both unlocked and greyed out
 
-  @param name  Achievement base filename
+  @param name        Achievement base filename
+  @param objectives  Optional list of objectives images to load, for use with GetImg
 ]]
-function sprites.addAchievement(name)
+function sprites.addAchievement(name, objectives)
   sprites.addSprite("achievements", name)
   sprites.addSprite("achievements", name .. "_gray")
+  -- add any extra objective images requested
+  if objectives then
+    for _, objective in pairs(objectives) do
+      sprites.addSprite("achievements", name .. "_" .. objective)
+    end
+  end
 end
 
 --[[--

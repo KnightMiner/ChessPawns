@@ -23,6 +23,33 @@ achvApi:AddChievo{
   img = "img/achievements/chess_one_shot.png",
 }
 
+local difficulties = {"hard", "normal", "easy"}
+
+--[[--
+  Selects an image based on the achievement status for victory images
+
+  @param chievo  Achievement instance
+  @return  Achievement image path
+]]
+local function getVictoryImg(chievo)
+  -- if achieved, use full image with all medals
+  if achvApi:IsChievoCompleted(chievo.id) then
+    return chievo.img
+  end
+
+  -- return highest earned metal
+  local baseImg = chievo.img:sub(1,-5)
+  local progress = achvApi:GetChievoProgress(chievo.id)
+  for _, diff in ipairs(difficulties) do
+    if progress[diff] then
+      return baseImg .. "_" .. diff .. ".png"
+    end
+  end
+
+  -- no progress image
+  return chievo.img_gray
+end
+
 -- general
 achvApi:AddChievo{
   id = "2_clear",
@@ -33,7 +60,8 @@ achvApi:AddChievo{
     easy = true,
     normal = true,
     hard = true,
-  }
+  },
+  GetImg = getVictoryImg
 }
 
 achvApi:AddChievo{
@@ -45,7 +73,8 @@ achvApi:AddChievo{
     easy = true,
     normal = true,
     hard = true,
-  }
+  },
+  GetImg = getVictoryImg
 }
 
 achvApi:AddChievo{
@@ -57,7 +86,8 @@ achvApi:AddChievo{
     easy = true,
     normal = true,
     hard = true,
-  }
+  },
+  GetImg = getVictoryImg
 }
 
 achvApi:AddChievo{

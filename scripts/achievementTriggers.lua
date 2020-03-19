@@ -20,6 +20,24 @@ function this:available(id)
 end
 
 --[[--
+  Mark the given difficulty for victory
+
+  @param islands  Number of islands cleared
+  @param diff     Difficulty name
+]]
+local function achieveDifficulty(islands, diff)
+  local name = islands .. "_clear"
+  if not achvApi:GetChievoProgress(name)[diff] then
+    achvApi:ToastUnlock({
+      name = string.format("%s %d Island %s Victory", squadname, islands, (diff:gsub("^%l", string.upper))),
+      tip = string.format('Complete %d corporate islands in %s then win the game.', islands, diff),
+      img = string.format('img/achievements/chess_%d_clear_%s.png', islands, diff),
+    })
+    achvApi:TriggerChievo(name, {[diff] = true})
+  end
+end
+
+--[[--
   Initializes the achievement triggers
 ]]
 function this:init()
@@ -42,10 +60,8 @@ function this:init()
 
       -- trigger achievement based on win conditions
       local difficulty = GetRealDifficulty()
-      for i = 0, difficulty do
-        achvApi:TriggerChievo(islands .. "_clear", {
-          [difficulties[i]] = true
-        })
+      if difficulty >= 0 and difficulty <= 2 then
+        achieveDifficulty(islands, difficulties[difficulty])
       end
 
       -- highscore achievement
