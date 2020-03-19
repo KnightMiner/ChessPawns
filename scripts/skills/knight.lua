@@ -379,7 +379,7 @@ function Chess_Knight_Smite:GetSkillEffect(p1, p2)
       damage.sAnimation = PUSH_ANIMS[dir]
       ret:AddDamage(damage)
       -- increment pushes for achievement
-      achvTrigger:checkReposition(ret, point, dir)
+      achvTrigger:checkPush(ret, point, dir)
     end
   end
 

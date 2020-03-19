@@ -74,7 +74,7 @@ function Chess_Pawn_Spear:GetSkillEffect(p1, p2)
   local direction = GetDirection(p2 - p1)
 
   -- increment pushes for achievement
-  achvTrigger:checkReposition(ret, p2, direction)
+  achvTrigger:checkPush(ret, p2, direction)
 
   return ret
 end

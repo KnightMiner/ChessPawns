@@ -3,10 +3,10 @@ local achvApi = mod:loadScript("achievements/api")
 
 -- special
 achvApi:AddChievo{
-  id = "repositioning",
-  name = "Repositioning",
-  tip = "Use pawn, rook, and knight weapons to reposition other mechs 3 times in one mission.",
-  img = "img/achievements/chess_repositioning.png",
+  id = "woodpusher",
+  name = "Woodpusher",
+  tip = "Use pawn, rook, and knight weapons to push other mechs 3 times in one mission.",
+  img = "img/achievements/chess_woodpusher.png",
 }
 
 achvApi:AddChievo{

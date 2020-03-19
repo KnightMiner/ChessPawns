@@ -386,7 +386,7 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
         ret:AddScript(string.format("Chess_Castle_Charge:CheckAchievement(%s)", landing:GetString()))
       end
       -- increment pushes for achievement
-      achvTrigger:checkReposition(ret, target)
+      achvTrigger:checkPush(ret, target)
 
       -- add damage where the target used to be. Used for damage for the weapon preview
       -- if we add damage to the new position, it may show as targeting the attacking mech
@@ -406,7 +406,7 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
         push.sAnimation = "airpush_"..sideDir
         ret:AddDamage(push)
         -- increment pushes for achievement
-        achvTrigger:checkReposition(ret, point, sideDir)
+        achvTrigger:checkPush(ret, point, sideDir)
       end
     end
   end

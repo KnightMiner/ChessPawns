@@ -76,19 +76,18 @@ function this:trigger(id)
 end
 
 --[[--
-  Increments the reposition counter for the mission. Global function to run as a script
+  Increments the push counter for the mission. Global function to run as a script
 ]]
-function incrementChessAchievementReposition()
+function incrementChessAchievementWoodpusher()
   -- skip if no mission
   local mission = GetCurrentMission()
   if not mission then return end
 
   -- increment the count, then grant the achievement if relevant
-  local count = mission.chess_repositioned or 0
-  mission.chess_repositioned = count + 1
-  LOG(mission.chess_repositioned)
-  if mission.chess_repositioned >= 3 then
-    this:trigger("repositioning")
+  local count = mission.chess_woodpusher or 0
+  mission.chess_woodpusher = count + 1
+  if mission.chess_woodpusher >= 3 then
+    this:trigger("woodpusher")
   end
 end
 
@@ -98,16 +97,16 @@ end
   @param point  Point to check
   @param dir    Direction of damage to check, can be nil to not check direction
 ]]
-function this:checkReposition(ret, point, dir)
+function this:checkPush(ret, point, dir)
   -- skip if we already got the achievement
-  if not this:available("repositioning") then return end
+  if not this:available("woodpusher") then return end
 
   -- pawn must be a mech
   if Board:IsPawnTeam(point, TEAM_MECH) then
     -- pawn must be active, and if set the direction must be open
     local pawn = Board:GetPawn(point)
     if pawn:IsActive() and (not dir or not Board:IsBlocked(point + DIR_VECTORS[dir], pawn:GetPathProf())) then
-      ret:AddScript("incrementChessAchievementReposition()")
+      ret:AddScript("incrementChessAchievementWoodpusher()")
     end
   end
 end
