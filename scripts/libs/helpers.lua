@@ -104,17 +104,6 @@ local function blockType(point)
 end
 
 --[[--
-  Creates a key for a table from a point object.
-  Basically a simplier form of Point:GetString()
-
-  @param point  Point to convert into key
-  @return  Simple string of point
-]]
-local function pointKey(point)
-  return string.format("%s,%s", point.x, point.y)
-end
-
---[[--
   Gets all target areas in a straight line
 
   @param move    Maximum spaces to move
@@ -137,7 +126,7 @@ function helpers.getTargetLine(start, speed, extra)
 
       -- free spaces means we we keep this
       if lineType == FREE then
-        points[pointKey(linePoint)] = linePoint
+        points[p2idx(linePoint)] = linePoint
 
         -- extra means extend off sides
         if extra > 0 then
@@ -151,7 +140,7 @@ function helpers.getTargetLine(start, speed, extra)
 
               -- free means add point
               if sideType == FREE then
-                points[pointKey(sidePoint)] = sidePoint
+                points[p2idx(sidePoint)] = sidePoint
               end
             end
           end
