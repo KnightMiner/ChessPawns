@@ -1,5 +1,6 @@
 local mod = mod_loader.mods[modApi.currentMod]
 local achvApi = mod:loadScript("achievements/api")
+local helpers = mod:loadScript("libs/helpers")
 
 local this = {}
 local squadname = "Chess Pawns"
@@ -16,7 +17,7 @@ end
   Public function to check if the squad is selected an an achievement has not been unlocked
 ]]
 function this:available(id)
-  return checkSquad() and not achvApi:GetChievoStatus(id)
+  return not helpers.isTooltip() and not IsTestMechScenario() and checkSquad() and not achvApi:GetChievoStatus(id)
 end
 
 --[[--
