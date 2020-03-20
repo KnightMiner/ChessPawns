@@ -5,6 +5,13 @@ local helpers = mod:loadScript("libs/helpers")
 local this = {}
 local squadname = "Chess Pawns"
 local difficulties = {[0] = "easy", [1] = "normal", [2] = "hard"}
+local bonusAchievements = {"woodpusher", "pawn_grenade", "one_shot"}
+local unlock = {
+  unlockTitle = 'Mech Unlocked!',
+  name = 'Bishop Mech',
+  tip = 'Bishop Mech unlocked. This mech can now be selected in custom squads.',
+  img = 'img/achievements/chess_secret.png',
+}
 
 --[[--
   Helper function to verify the proper squad is selected
@@ -75,6 +82,21 @@ function this:init()
 end
 
 --[[--
+  Checks if we completed all the achievements needed for the secret unlock
+
+  @return true if the secret is unlocked
+]]
+function this:hasSecret()
+  for _, id in ipairs(bonusAchievements) do
+    if not achvApi:GetChievoStatus(id) then
+      return false
+    end
+  end
+
+  return true
+end
+
+--[[--
   Triggers the specified achievement
 
   @param id  Achievement ID to trigger
@@ -90,6 +112,11 @@ function this:trigger(id)
 
   -- trigger it
   achvApi:TriggerChievo(id)
+
+  -- show bonus message when relevant
+  if this:hasSecret() then
+    achvApi:ToastUnlock(unlock)
+  end
 end
 
 --[[--

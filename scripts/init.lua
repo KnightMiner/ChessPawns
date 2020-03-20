@@ -82,6 +82,15 @@ function mod:init()
       Icon =              {},
     },
     {
+      Name = "chess_bishop",
+      Default =           { PosX = -13, PosY = -15 },
+      Animated =          { PosX = -13, PosY = -15, NumFrames = 4 },
+      Submerged =         { PosX = -13, PosY =  -9 },
+      Broken =            { PosX = -13, PosY = -15 },
+      SubmergedBroken =   { PosX = -13, PosY =  -9 },
+      Icon =              {},
+    },
+    {
       Name = "chess_pawn",
       Default =           { PosX = -12, PosY = 0 },
       Animated =          { PosX = -12, PosY = 0, NumFrames = 4 },
@@ -99,11 +108,13 @@ function mod:init()
   sprites.addSprite("weapons", "chess_castle_charge")
   sprites.addSprite("weapons", "chess_knight_stomp")
   sprites.addSprite("weapons", "chess_spawn_pawn")
+  sprites.addSprite("weapons", "chess_bishop_charge")
   sprites.addSprite("effects", "chess_shotup_pawn")
   sprites.addSprite("effects", "chess_shotup_pawn_alt")
   sprites.addSprite("combat/icons", "icon_king_move")
   sprites.addSprite("combat/icons", "icon_knight_move")
   sprites.addSprite("combat/icons", "icon_rook_move")
+  sprites.addSprite("combat/icons", "icon_bishop_move")
   sprites.addSprite("combat/icons", "icon_pawn_move")
   sprites.addSprite("combat/icons", "icon_pawn_move_explode")
   sprites.addSprite("combat/icons", "icon_empty_glow")
@@ -115,6 +126,7 @@ function mod:init()
   sprites.addAchievement("chess_woodpusher")
   sprites.addAchievement("chess_pawn_grenade")
   sprites.addAchievement("chess_one_shot")
+  sprites.addSprite("achievements", "chess_secret")
 
   -- texts
   local texts = require(self.scriptPath.."weapon_texts")
@@ -125,6 +137,7 @@ function mod:init()
   self:loadScript("skills/king")
   self:loadScript("skills/knight")
   self:loadScript("skills/rook")
+  self:loadScript("skills/bishop")
   self:loadScript("skills/pawn")
   self:loadScript("pawns")
   self:loadScript("achievements")
@@ -133,6 +146,7 @@ function mod:init()
   -- diagonal pawn animations
   local diagonal = self:loadScript("libs/diagonalMove")
   diagonal.setupAnimations("Chess_King", "units/player/chess_king_diagonal")
+  diagonal.setupAnimations("Chess_Bishop", "units/player/chess_bishop_diagonal")
 
   -- shop
   self.shop = self:loadScript("libs/shop")
@@ -151,6 +165,15 @@ function mod:init()
     name = texts.Chess_Spawn_Pawn_Name,
     desc = "Adds Spawn Pawn to the store."
   })
+  -- add bishop charge only if the bishop is unlocked
+  local achvTrigger = self:loadScript("achievementTriggers")
+  if achvTrigger:hasSecret() then
+    self.shop:addWeapon({
+      id = "Chess_Bishop_Charge",
+      name = texts.Chess_Bishop_Charge_Name,
+      desc = "Adds Bishop Charge to the store."
+    })
+  end
 end
 
 function mod:load(options,version)
@@ -172,7 +195,7 @@ function mod:load(options,version)
   self.config.rookRockThrow = not options.rookRockThrow or options.rookRockThrow.enabled
   self.config.knightCapMax = options.knightCapMax and options.knightCapMax.enabled
   local image = self.config.rookRockThrow and "Mountain" or "Normal"
-  for _, weapon in pairs({"Chess_Castle_Charge", "Chess_Castle_Charge_A", "Chess_Castle_Charge_B", "Chess_Castle_Charge_AB"}) do
+  for _, weapon in pairs({"Chess_Castle_Charge", "Chess_Castle_Charge_A", "Chess_Bishop_Charge"}) do
     _G[weapon].TipImage = _G[weapon].TipImages[image]
   end
 

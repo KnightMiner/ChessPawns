@@ -53,7 +53,15 @@ end
 
 function this:load(options)
   for _, weapon in ipairs(self.weapons) do
-    if options[weapon.opt].enabled then
+    -- if the option is missing, use the default value
+    local enabled
+    if options[weapon.opt] then
+      enabled = options[weapon.opt].enabled
+    else
+      enabled = weapon.default.enabled
+    end
+    if enabled then
+      LOG(weapon.id)
       if not list_contains(self.weapons_enabled, weapon.id) then
         table.insert(self.weapons_enabled, weapon.id)
       end

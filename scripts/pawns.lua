@@ -84,6 +84,33 @@ Chess_King = Pawn:new {
 AddPawnName("Chess_King")
 
 --[[--
+  Bishop Mech: Alternative to the rook, moves diagonally instead of orthogonally
+
+  Move Skill: Limited to diagonal lines, but full length of the board
+  Weapon: Bishop Charge - Charge diagonally and toss an enemy back
+]]
+Chess_Bishop = Pawn:new {
+  -- basic
+  Name = "Bishop Mech",
+  Class = "Brute",
+  DefaultTeam = TEAM_PLAYER,
+  Massive = true,
+  Armor = true,
+  -- stats
+  Health = 3,
+  MoveSpeed = 7,
+  -- skills
+  SkillList = { "Chess_Bishop_Charge" },
+  MoveSkill = Chess_Bishop_Move,
+  -- display
+  Image = "chess_bishop",
+  ImageOffset = 3, -- yellow
+  SoundLocation = "/mech/prime/rock_mech/",
+  ImpactMaterial = IMPACT_METAL
+}
+AddPawnName("Chess_Bishop")
+
+--[[--
   Pawn Mech: Deployable mech with limited movement
 
   Move Skill: Limited to straight lines

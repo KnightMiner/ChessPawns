@@ -141,6 +141,30 @@ function diagonal.addStep(ret, point)
 end
 
 --[[--
+  Minimizes a number to only have at most 1 in any direction
+
+  @param i  number to minimize
+  @return Minimized number
+]]
+local function minimizeNumber(i)
+  if i == 0 then
+    return i
+  else
+    return i / math.abs(i)
+  end
+end
+
+--[[--
+  Minimizes a point to only have at most 1 in any direction
+
+  @param point  Point to minimize
+  @return Minimized point
+]]
+function diagonal.minimize(point)
+  return Point(minimizeNumber(point.x), minimizeNumber(point.y))
+end
+
+--[[--
   Logic to animation a full diagonal movement path
 
   @param ret  SkillEffect instance
@@ -166,7 +190,7 @@ function diagonal.addMove(ret, p1, p2)
   local wasFire = false
   if distance > 1 then
     -- normalize the offset to be distance of 1
-    offset = Point(offset.x / distance, offset.y / distance)
+    offset = diagonal.minimize(offset)
 
     -- prepare the animation
     diagonal.setColor()
@@ -192,6 +216,26 @@ function diagonal.addMove(ret, p1, p2)
 
   -- add a normal move so it shows up in the tooltip
   ret:AddTeleport(p1, p2, NO_DELAY)
+end
+
+--[[--
+  Gets the target for a shot in a diagonal direction
+
+  @param p1       Position of the pawn
+  @param p2       Selected position
+  @param profile  Pathing method to use
+  @return Point of the target for this projectile
+]]
+function diagonal.getProjectileEnd(p1, p2, profile)
+  profile = profile or PATH_PROJECTILE
+	local direction = diagonal.minimize(p2 - p1)
+	local target = p2
+
+	while not Board:IsBlocked(target, profile) do
+		target = target + direction
+	end
+
+	return target
 end
 
 return diagonal

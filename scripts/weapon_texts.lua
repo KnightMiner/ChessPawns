@@ -21,6 +21,13 @@ return {
   Chess_Spawn_Pawn_Upgrade2 = "Explosive",
   Chess_Spawn_Pawn_B_UpgradeDescription = "Pawns explode when killed, dealing 2 damage to adjacent tiles. Can target water and holes to cause an immediate explosion.",
 
+  Chess_Bishop_Charge_Name = "Bishop Charge",
+  Chess_Bishop_Charge_Description = "Fly in a diagonal line and slam into a target, tossing it where you started.",
+  Chess_Bishop_Charge_Upgrade1 = "Phase",
+  Chess_Bishop_Charge_A_UpgradeDescription = "Can charge through buildings and units.",
+  Chess_Bishop_Charge_Upgrade2 = "+2 Damage",
+  Chess_Bishop_Charge_B_UpgradeDescription = "Increases damage to by 2.",
+
   Chess_Pawn_Spear_Name = "Pawn Spear",
   Chess_Pawn_Spear_Description = "Strike a target at melee range with a spear, doing damage and pushing.",
   Chess_Pawn_Spear_Upgrade1 = "+1 Range",

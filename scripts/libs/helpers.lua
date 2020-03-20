@@ -158,6 +158,50 @@ function helpers.getTargetLine(start, speed, extra)
   return list
 end
 
+--[[--
+  Gets all target areas in a straight line
+
+  @param move    Maximum spaces to move
+  @param offsets Number of spaces to offset from the line
+  @return  PointList of available points
+]]
+function helpers.getDiagonalMoves(start, speed, extra)
+  local points = PointList()
+
+  -- move in all four directions
+  for dir = DIR_START, DIR_END do
+    -- straight line
+    local offset = DIR_VECTORS[dir]
+    for x = 1, extra do
+      local point = start + offset * x
+      local type = blockType(point)
+      -- blocked we are done
+      if type == BLOCKED then break end
+
+      -- free spaces means we we keep this, occupied we keep going but skip this
+      if type == FREE then
+        points:push_back(point)
+      end
+    end
+
+    -- diagonal line
+    offset = offset + DIR_VECTORS[(dir+1)%4]
+    for x = 1, speed do
+      local point = start + offset * x
+      local type = blockType(point)
+      -- blocked we are done
+      if type == BLOCKED then break end
+
+      -- free spaces means we we keep this, occupied we keep going but skip this
+      if type == FREE then
+        points:push_back(point)
+      end
+    end
+  end
+
+  return points
+end
+
 --- Map of pawn name to boolean if they explode
 local PAWN_EXPLODES = {
   Chess_Pawn_B      = true,

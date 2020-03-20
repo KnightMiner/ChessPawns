@@ -2,6 +2,7 @@ local mod = mod_loader.mods[modApi.currentMod]
 local config = mod.config
 local achvTrigger = mod:loadScript("achievementTriggers")
 local cutils = mod:loadScript("libs/CUtils")
+local diagonal = mod:loadScript("libs/diagonalMove")
 local helpers = mod:loadScript("libs/helpers")
 local previewer = mod:loadScript("weaponPreview/api")
 local tips = mod:loadScript("libs/tutorialTips")
@@ -123,6 +124,8 @@ Chess_Castle_Charge = Skill:new {
   -- settings
   Damage = 1,
   Push = false,
+  Phase = false,
+  Diagonal = false,
   -- effects
   Icon = "weapons/chess_castle_charge.png",
   LaunchSound = "/weapons/charge",
@@ -191,41 +194,39 @@ function Chess_Castle_Charge:GetTargetArea(start)
   -- in each direction, draw a full path
   for dir = DIR_START, DIR_END do
     local offset = DIR_VECTORS[dir]
+    -- bishop charges diagonal instead
+    if self.Diagonal then
+      offset = offset + DIR_VECTORS[(dir+1)%4]
+    end
+
+    -- offset the point in each direction
     local point = start + offset
     if Board:IsValid(point) then
-      -- if there is a blockage, try melee throw
-      if Board:IsBlocked(point, PATH_PROJECTILE) then
-        -- space behind must be free
-        if not Board:IsBlocked(start - offset, PATH_FLYER) then
-          -- must be a pawn and not be guarding
-          -- or must be a mountain
-          if (Board:IsPawnSpace(point) and not Board:GetPawn(point):IsGuarding())
-              or (config.rookRockThrow and Board:GetTerrain(point) == TERRAIN_MOUNTAIN) then
+      for i = 1, 7 do
+        point = start + offset * i
+        -- need an open spot to move the mech
+        local canTarget = not Board:IsBlocked(point - offset * (i == 1 and 2 or 1), PATH_FLYER)
+
+        -- if a pawn, add and stop
+        if Board:IsPawnSpace(point) then
+          if canTarget and not Board:GetPawn(point):IsGuarding() then
             ret:push_back(point)
           end
-        end
-      -- otherwise, open space is eligable for a charge attack, so add all spaces to the end
-      else
-        ret:push_back(point)
-        for i = 2, 7 do
-          point = start + offset * i
-          -- if a pawn, add and stop
-          if Board:IsPawnSpace(point) then
-            if not Board:GetPawn(point):IsGuarding() then
-              ret:push_back(point)
-            end
-            break
-          -- can target mountains to throw a rock
-          elseif config.rookRockThrow and Board:GetTerrain(point) == TERRAIN_MOUNTAIN then
+          -- can phase through pawns
+          if not self.Phase then break end
+        -- can target mountains to throw a rock
+        elseif config.rookRockThrow and Board:GetTerrain(point) == TERRAIN_MOUNTAIN then
+          if canTarget then
             ret:push_back(point)
-            break
-          -- if empty, add and try next space
-          elseif not Board:IsBlocked(point, PATH_PROJECTILE) then
-            ret:push_back(point)
-          -- blocked means we are done
-          else
-            break
           end
+          -- cannot phase through mountains
+          break
+        -- if empty, add and try next space
+        elseif not Board:IsBlocked(point, PATH_PROJECTILE) then
+          ret:push_back(point)
+        -- blocked means we are done, unless phasing
+        elseif not self.Phase then
+          break
         end
       end
     end
@@ -301,7 +302,7 @@ end
   Checks if the current charge attack would trigger the achievement
 
   @param point    Point the pawn lands
-  @param offsetDir  Direction the pawn was thrown. nil if push is disabled
+  @param offsetDir  Direction the pawn was thrown. Will be -1 for diagonal, nil if push is disabled
 ]]
 function Chess_Castle_Charge:CheckAchievement(point, offsetDir)
   local pawn = Board:GetPawn(point)
@@ -312,9 +313,9 @@ function Chess_Castle_Charge:CheckAchievement(point, offsetDir)
     local kills = 0
     for dir = DIR_START, DIR_END do
       local offset = point + DIR_VECTORS[dir]
-      -- if the offset dir is nil, no push
+      -- if the offset dir is nil, no push. If its -1, all directions push
       -- if its a direction 0-3, pushes must be +- 1 away from that
-      local pushDir = offsetDir ~= nil and ((offsetDir+dir) % 2 == 1) and dir or nil
+      local pushDir = offsetDir ~= nil and (offsetDir == -1 or (offsetDir+dir) % 2 == 1) and dir or nil
       if Board:IsPawnSpace(offset) and Board:IsPawnTeam(offset, TEAM_ENEMY)
           and willDamageKill(Board:GetPawn(offset), 2, pushDir) then
         kills = kills + 1
@@ -331,19 +332,17 @@ end
 --- Flip the target over ourselves
 function Chess_Castle_Charge:GetSkillEffect(p1, p2)
   local ret = SkillEffect()
-  local dir = GetDirection(p2 - p1)
-  local dirVec = DIR_VECTORS[dir]
   local path = PATH_PROJECTILE
-  local target = GetProjectileEnd(p1, p2, path)
+
+  -- fire in the direction based on type
+  local dirVec = diagonal.minimize(p2 - p1)
+  local target = diagonal.getProjectileEnd(p1, p2, path)
+  local isDiagonal = math.abs(dirVec.x) == math.abs(dirVec.y)
 
   local doDamage = true
   local isMountain = config.rookRockThrow and Board:GetTerrain(target) == TERRAIN_MOUNTAIN
-  -- empty means we reached the board edge, so extend target by 1
-  if not Board:IsBlocked(target, path) then
-    doDamage = false
-    target = target + dirVec
   -- if its not a pawn or mountain, or its a pawn and the pawn is not movable, no damage
-  elseif not isMountain and (not Board:IsPawnSpace(target) or Board:GetPawn(target):IsGuarding()) then
+  if not isMountain and (not Board:IsPawnSpace(target) or Board:GetPawn(target):IsGuarding()) then
     doDamage = false
   end
 
@@ -351,7 +350,11 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
   local newPos = target - dirVec
   local moved = p1 ~= newPos
   if moved then
-    ret:AddCharge(Board:GetSimplePath(p1, newPos), p1:Manhattan(newPos) * 0.1)
+    if isDiagonal then
+      diagonal.addMove(ret, p1, newPos)
+    else
+      ret:AddCharge(Board:GetSimplePath(p1, newPos), p1:Manhattan(newPos) * 0.1)
+    end
   end
 
   -- deal damage if required
@@ -372,17 +375,16 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
     toss:push_back(landing)
 
     -- set direction to use it in the achievment check
+    local dir
     if self.Push then
-      dir = GetDirection(p2 - p1)
-    else
-      dir = nil
+      dir = isDiagonal and -1 or GetDirection(p2 - p1)
     end
 
     -- mountains toss a rock
     if isMountain then
       -- damage the mountain, then spawn and throw the rock
       local damage = SpaceDamage(target, self.Damage)
-      if moved then
+      if moved or isDiagonal then
         ret:AddDamage(damage)
       else
         ret:AddMelee(newPos, damage)
@@ -397,8 +399,8 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
       fakeRock.sPawn = "RockThrown"
       previewer:AddDamage(fakeRock)
     else
-      -- fake punch for pawn animation, real punch for mountain
-      if not moved then
+      -- fake punch for pawn animation
+      if not moved and not isDiagonal then
         ret:AddMelee(newPos, SpaceDamage(target, 0))
       end
       -- otherwise its a pawn, toss the unit
@@ -421,16 +423,28 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
       ret:AddDamage(damage)
     end
 
-    -- push to either side
     if self.Push then
-      for i = -1, 1, 2 do
-        local sideDir = (dir + i) % 4
-        local point = landing + DIR_VECTORS[sideDir]
-        local push = SpaceDamage(point, 0, sideDir)
-        push.sAnimation = "airpush_"..sideDir
-        ret:AddDamage(push)
-        -- increment pushes for achievement
-        achvTrigger:checkPush(ret, point, sideDir)
+      if isDiagonal then
+        -- push all four directions
+        for i = DIR_START, DIR_END do
+          local point = landing + DIR_VECTORS[i]
+          local push = SpaceDamage(point, 0, i)
+          push.sAnimation = "airpush_"..i
+          ret:AddDamage(push)
+          -- increment pushes for achievement
+          achvTrigger:checkPush(ret, point, i)
+        end
+      else
+        -- push to either side
+        for i = -1, 1, 2 do
+          local sideDir = (dir + i) % 4
+          local point = landing + DIR_VECTORS[sideDir]
+          local push = SpaceDamage(point, 0, sideDir)
+          push.sAnimation = "airpush_"..sideDir
+          ret:AddDamage(push)
+          -- increment pushes for achievement
+          achvTrigger:checkPush(ret, point, sideDir)
+        end
       end
     end
   end
