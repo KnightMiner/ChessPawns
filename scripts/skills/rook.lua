@@ -262,18 +262,31 @@ end
 --[[--
   Checks if the given damage is enough to kill a pawn
 
-  @param point   Pawn location
-  @param amount  Amount of damage to deal
+  @param point    Pawn location
+  @param amount   Amount of damage to deal
+  @param pushDir  Direction of push before damage, to check if it deals extra damage
   @return  True if the amount of damage is enough to kill this pawn
 ]]
-local function willDamageKill(pawn, amount)
+local function willDamageKill(pawn, amount, pushDir)
   -- ice and shield always takes 2 hits to break
   if pawn:IsFrozen() or pawn:IsShield() then
     return false
   end
 
-  -- ACID and health will affect the killing
   local health = pawn:GetHealth()
+  -- if pushed, check if we will deal push damage or entirely miss
+  if pushDir then
+    if Board:IsBlocked(pawn:GetSpace() + DIR_VECTORS[pushDir], PATH_FLYER) then
+      health = health - 1
+      -- if its dead now, the pawn did not kill it
+      if health == 0 then
+        return false
+      end
+    else
+      return false
+    end
+  end
+  -- ACID and health will affect the killing
   if pawn:IsAcid() then
     amount = amount * 2
   -- note this returns true even if acid
@@ -287,9 +300,10 @@ end
 --[[--
   Checks if the current charge attack would trigger the achievement
 
-  @param point  Point the pawn lands
+  @param point    Point the pawn lands
+  @param offsetDir  Direction the pawn was thrown. nil if push is disabled
 ]]
-function Chess_Castle_Charge:CheckAchievement(point)
+function Chess_Castle_Charge:CheckAchievement(point, offsetDir)
   local pawn = Board:GetPawn(point)
 
   -- ensure the space has an exploding pawn
@@ -298,8 +312,11 @@ function Chess_Castle_Charge:CheckAchievement(point)
     local kills = 0
     for dir = DIR_START, DIR_END do
       local offset = point + DIR_VECTORS[dir]
+      -- if the offset dir is nil, no push
+      -- if its a direction 0-3, pushes must be +- 1 away from that
+      local pushDir = offsetDir ~= nil and ((offsetDir+dir) % 2 == 1) and dir or nil
       if Board:IsPawnSpace(offset) and Board:IsPawnTeam(offset, TEAM_ENEMY)
-          and willDamageKill(Board:GetPawn(offset), 2) then
+          and willDamageKill(Board:GetPawn(offset), 2, pushDir) then
         kills = kills + 1
       end
     end
@@ -354,6 +371,13 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
     toss:push_back(target)
     toss:push_back(landing)
 
+    -- set direction to use it in the achievment check
+    if self.Push then
+      dir = GetDirection(p2 - p1)
+    else
+      dir = nil
+    end
+
     -- mountains toss a rock
     if isMountain then
       -- damage the mountain, then spawn and throw the rock
@@ -383,7 +407,7 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
 
       -- check the achievement
       if achvTrigger:available("pawn_grenade") then
-        ret:AddScript(string.format("Chess_Castle_Charge:CheckAchievement(%s)", landing:GetString()))
+        ret:AddScript(string.format("Chess_Castle_Charge:CheckAchievement(%s, %d)", landing:GetString(), dir))
       end
       -- increment pushes for achievement
       achvTrigger:checkPush(ret, target)
