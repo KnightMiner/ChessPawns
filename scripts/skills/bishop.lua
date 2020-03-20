@@ -26,10 +26,17 @@ tips:Add{
   Upgrade: Move extra spaces in a second line
 ]]
 Chess_Bishop_Move = {}
-function Chess_Bishop_Move:GetTargetArea(p1)
+--[[--
+  This function is a safer version of GetTargetArea as the weaponPreview lib injects code into all GetTargetArea functions
+  Designed to be called externally by mods with custom movement skills
+
+  @param p1    Pawn location
+  @param move  Pawn move speed, defaults to Pawn:GetMoveSpeed()
+  @return  Target area for this function
+]]
+function Chess_Bishop_Move:GetTargetAreaExt(p1, move)
   tips:Trigger("Bishop_Move", p1)
-  -- rook moves up to 7 in one direction, extra allows a second move on another axis
-  local move = Pawn:GetMoveSpeed()
+  local move = move or Pawn:GetMoveSpeed()
   local extra = 0
   if move > 7 then
     extra = move - 7
@@ -37,13 +44,42 @@ function Chess_Bishop_Move:GetTargetArea(p1)
   end
   return helpers.getDiagonalMoves(p1, move, extra)
 end
+Chess_Bishop_Move.GetTargetArea = Chess_Bishop_Move.GetTargetAreaExt
+
+
+--- CauldronPilots compatibility: allow leaping diagnally
+function Chess_Bishop_Move:CricketTargetArea(p1)
+  -- start with defaukt move
+  local ret = self:GetTargetAreaExt(p1)
+  local defaultSpaces = extract_table(ret)
+  -- add any bonus spaces diagonally in each direction
+  for dir = DIR_START, DIR_END do
+    local offset = DIR_VECTORS[dir] + DIR_VECTORS[(dir+1)%4]
+    for i = 1, Pawn:GetMoveSpeed() do
+      local point = p1 + offset*i
+      -- if this point is invalid, all later points will also be invalid
+      if not Board:IsValid(point) then break end
+			-- point must be somewhere they can land and not already included
+      if not Board:IsBlocked(point, Pawn:GetPathProf()) and not list_contains(defaultSpaces, point) then
+        ret:push_back(point)
+      end
+    end
+  end
+
+  return ret
+end
 
 --[[--
-  Draws the path for the given bishop movement
-  All paths should consist of a single line, though some lines are diagonal
+  This function is a safer version of GetSkillEffect as the weaponPreview lib injects code into all GetTargetArea functions
+  It also allows a clean way to build on an existing skill effect
+
+  @param p1   Pawn location
+  @param p2   Target location
+  @param ret  Existing SkillEffect instance
+  @return  Effect for this move
 ]]
-function Chess_Bishop_Move:GetSkillEffect(p1, p2)
-  local ret = SkillEffect()
+function Chess_Bishop_Move:GetSkillEffectExt(p1, p2, ret)
+  local ret = ret or SkillEffect()
 
   -- in diagonal line? use diagonal move util
   local offset = p2 - p1
@@ -55,6 +91,7 @@ function Chess_Bishop_Move:GetSkillEffect(p1, p2)
 
   return ret
 end
+Chess_Bishop_Move.GetSkillEffect = Chess_Bishop_Move.GetSkillEffectExt
 
 --[[--
   Bishop Charge: charge diagonal and flip enemy overself

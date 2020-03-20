@@ -44,13 +44,13 @@ end
   Upgrades: Alternate orthogonal and diagonal
 ]]
 Chess_King_Move = {}
-function Chess_King_Move:GetTargetArea(p1)
+function Chess_King_Move:GetTargetAreaExt(p1, move)
   tips:Trigger("King_Move", p1)
   local ret = PointList()
 
   -- first upgrade increases both, after that only 1 is increased
   local orthogonal, diagonal
-  local move = Pawn:GetMoveSpeed()
+  local move = move or Pawn:GetMoveSpeed()
   if (move <= 2) then
     orthogonal = move
     diagonal = move
@@ -71,10 +71,11 @@ function Chess_King_Move:GetTargetArea(p1)
 
   return ret
 end
+Chess_King_Move.GetTargetArea = Chess_King_Move.GetTargetAreaExt
 
 --- Move if a line, leap otherwise
-function Chess_King_Move:GetSkillEffect(p1, p2)
-  local ret = SkillEffect()
+function Chess_King_Move:GetSkillEffectExt(p1, p2, ret)
+  local ret = ret or SkillEffect()
 
   -- in diagonal line? use diagonal move util
   local offset = p2 - p1
@@ -86,6 +87,7 @@ function Chess_King_Move:GetSkillEffect(p1, p2)
 
   return ret
 end
+Chess_King_Move.GetSkillEffect = Chess_King_Move.GetSkillEffectExt
 
 --[[--
   Spawn Pawn: Spawns up to 2 pawns to do the king's fighting

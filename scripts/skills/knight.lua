@@ -129,7 +129,7 @@ end
 --[[--
   Knight Move: 2 spaces in one direction, then 1 space on the other axis
 ]]
-Chess_Knight_Move = Move:new {
+Chess_Knight_Move = Skill:new {
   IsAttack = false
 }
 
@@ -142,10 +142,10 @@ Chess_Knight_Move = Move:new {
    5: Knight x2 + threeleaper x2
    6: Knight x3 + threeleaper x2
 ]]
-function Chess_Knight_Move:GetTargetArea(p1)
+function Chess_Knight_Move:GetTargetAreaExt(p1, move)
   tips:Trigger(self.IsAttack and "Knight_Attack" or "Knight_Move", p1)
   local ret = PointList()
-  local move = self.IsAttack and 2 or Pawn:GetMoveSpeed()
+  local move = self.IsAttack and 2 or move or Pawn:GetMoveSpeed()
   if move < 1 then
     return ret
   end
@@ -208,6 +208,7 @@ function Chess_Knight_Move:GetTargetArea(p1)
 
   return ret
 end
+Chess_Knight_Move.GetTargetArea = Chess_Knight_Move.GetTargetAreaExt
 
 --[[--
   Divides a point elementwise by the given number, flooring any remainder
@@ -221,8 +222,9 @@ local function dividePoint(point, divisor)
 end
 
 --- Knight makes leaping movements. Will make multiple leaps if over 3 tiles
-function Chess_Knight_Move:GetSkillEffect(p1, p2)
-  local ret = SkillEffect()
+function Chess_Knight_Move:GetSkillEffectExt(p1, p2, ret)
+  local ret = ret or SkillEffect()
+  TESTING = ret
 
   -- if the movement is too far, add a middle move
   local middle = p1
@@ -249,6 +251,10 @@ function Chess_Knight_Move:GetSkillEffect(p1, p2)
   helpers.addLeap(ret, middle, p2)
 
   return ret
+end
+--- Needed to override rather than copy function as somehow Skill gets passed as the third argument here
+function Chess_Knight_Move:GetSkillEffect(p1, p2)
+  return self:GetSkillEffectExt(p1, p2)
 end
 
 --[[--

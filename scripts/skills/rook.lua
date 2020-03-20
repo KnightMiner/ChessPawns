@@ -29,16 +29,39 @@ tips:Add{
   Upgrade: Move extra spaces in a second line
 ]]
 Chess_Rook_Move = {}
-function Chess_Rook_Move:GetTargetArea(p1)
-  tips:Trigger("Rook_Move", p1)
+function Chess_Rook_Move:GetTargetAreaExt(p1, move)
   -- rook moves up to 7 in one direction, extra allows a second move on another axis
-  local move = Pawn:GetMoveSpeed()
+  tips:Trigger("Rook_Move", p1)
+  local move = move or Pawn:GetMoveSpeed()
   local extra = 0
   if move > 7 then
     extra = move - 7
     move = 7
   end
   return helpers.getTargetLine(p1, move, extra)
+end
+Chess_Rook_Move.GetTargetArea = Chess_Rook_Move.GetTargetAreaExt
+
+--- CauldronPilots compatibility: bonus spaces from CricketSkill
+function Chess_Rook_Move:CricketTargetArea(p1)
+  -- start with defaukt move
+  local ret = self:GetTargetAreaExt(p1)
+  local defaultSpaces = extract_table(ret)
+  -- add any bonus spaces diagonally in each direction
+  for dir = DIR_START, DIR_END do
+    local offset = DIR_VECTORS[dir]
+    for i = 1, Pawn:GetMoveSpeed() do
+      local point = p1 + offset*i
+      -- if this point is invalid, all later points will also be invalid
+      if not Board:IsValid(point) then break end
+			-- point must be somewhere they can land and not already included
+      if not Board:IsBlocked(point, Pawn:GetPathProf()) and not list_contains(defaultSpaces, point) then
+        ret:push_back(point)
+      end
+    end
+  end
+
+  return ret
 end
 
 --[[--
@@ -57,13 +80,14 @@ end
   Draws the path for the given rook movement
   All paths should consist of 1 or 2 lines over valid spaces
 ]]
-function Chess_Rook_Move:GetSkillEffect(p1, p2)
-  local ret = SkillEffect()
+function Chess_Rook_Move:GetSkillEffectExt(p1, p2, ret)
+  local ret = ret or SkillEffect()
   local path = Pawn:GetPathProf()
 
   -- if not a straight line, find mid point for move
   local move
-  if Pawn:GetMoveSpeed() > 7 then
+  local offset = p2 - p1
+  if offset.x ~= 0 and offset.y ~= 0 then
     local diffX = math.abs(p1.x - p2.x)
     local diffY = math.abs(p1.y - p2.y)
     if diffX > 0 and diffY > 0 then
@@ -83,8 +107,8 @@ function Chess_Rook_Move:GetSkillEffect(p1, p2)
         -- try the longer distance first, its the preferred path
         mid = diffX > diffY and midX or midY
 
-        -- the line to that point must be valid, if not it must be the other point
-        if not lineValid(p1, mid) then
+        -- the path to that point must be valid, if not it must be the other point
+        if not lineValid(p1, mid) or not lineValid(mid, p2) then
           mid = diffX > diffY and midY or midX
         end
       end
@@ -109,6 +133,7 @@ function Chess_Rook_Move:GetSkillEffect(p1, p2)
   -- charge remaining distance
   return ret
 end
+Chess_Rook_Move.GetSkillEffect = Chess_Rook_Move.GetSkillEffectExt
 
 --[[--
   Castle Charge: charge forwards and flip enemy overself
