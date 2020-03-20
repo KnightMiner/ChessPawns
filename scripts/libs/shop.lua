@@ -61,7 +61,6 @@ function this:load(options)
       enabled = weapon.default.enabled
     end
     if enabled then
-      LOG(weapon.id)
       if not list_contains(self.weapons_enabled, weapon.id) then
         table.insert(self.weapons_enabled, weapon.id)
       end
