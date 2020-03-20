@@ -97,7 +97,7 @@ Chess_Bishop = Pawn:new {
   Massive = true,
   Armor = true,
   -- stats
-  Health = 3,
+  Health = 2,
   MoveSpeed = 7,
   -- skills
   SkillList = { "Chess_Bishop_Charge" },

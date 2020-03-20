@@ -8,7 +8,7 @@ local trait = mod:loadScript("libs/trait")
 -- Move tooltip --
 local HELP_TEXT = "The bishop can move up to 7 spaces in a single diagonal. If the bishops's speed is greater than 7, you can use the extra to move in any orthogonal direction."
 trait:Add{
-  PawnTypes = "chess_bishop",
+  PawnTypes = "Chess_Bishop",
   Icon = "img/combat/icons/icon_bishop_move.png",
   IconGlow = "img/combat/icons/icon_empty_glow.png",
   Title = "Bishop Movement",
@@ -63,10 +63,11 @@ end
 ]]
 Chess_Bishop_Charge = Chess_Castle_Charge:new {
   -- base stats
-  PowerCost = 0,
+  PowerCost = 1,
   Upgrades = 2,
-  UpgradeCost = {2, 3},
+  UpgradeCost = {2, 2},
   -- settings
+  Damage = 2,
   Diagonal = true,
   -- effects
   Icon = "weapons/chess_bishop_charge.png",
@@ -94,7 +95,7 @@ Chess_Bishop_Charge = Chess_Castle_Charge:new {
 }
 Chess_Bishop_Charge.TipImage = Chess_Bishop_Charge.TipImages.Mountain
 
--- Upgrade 1: Push upgrade
+-- Upgrade 1: Phase upgrade
 Chess_Bishop_Charge_A = Chess_Bishop_Charge:new {
   Phase = true,
   TipImage = {
