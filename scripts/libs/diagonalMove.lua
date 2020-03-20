@@ -1,3 +1,11 @@
+-----------------------------------------------------------------------
+-- Diagonal Move Library
+-- v1.0
+-----------------------------------------------------------------------
+-- This contains helper functions to animate diagonal pawn movement and
+-- handle diagonal targeting and attacks.
+-----------------------------------------------------------------------
+
 local mod = mod_loader.mods[modApi.currentMod]
 local cutils = mod:loadScript("libs/CUtils")
 local diagonal = {}
@@ -78,10 +86,25 @@ function createDiagonalPawnAnimation(point)
 end
 
 --- Temporary workaround until the cutils fix is merged to make Pawn:SetFire(true) not affect the board
-function setDiagonalPawnFire()
-  if not Pawn:IsFire() then
-    cutils.SetPawnFire(Pawn, true)
+function setDiagonalPawnStatus(fire, acid)
+  if fire ~= nil and fire ~= Pawn:IsFire() then
+    cutils.SetPawnFire(Pawn, fire)
   end
+  if acid ~= nil and acid ~= Pawn:IsAcid() then
+    cutils.SetPawnAcid(Pawn, acid)
+  end
+end
+
+--[[--
+  Converts a boolean to a string to use in string.format
+]]
+local function boolString(bool)
+  if bool == nil then
+    return "nil"
+  elseif bool then
+    return "true"
+  end
+  return "false"
 end
 
 --[[--
@@ -124,11 +147,31 @@ function diagonal.addStep(ret, point)
     ret:AddScript(string.format("removeDiagonalItem(%s)", point:GetString()))
 
   -- on tiles where we might interact with the board, add a fake pawn for animation
-  elseif Board:IsPod(point) or Board:IsAcid(point) or Board:IsFire(point) or (Pawn:IsFire() and Board:GetTerrain(point) == TERRAIN_FOREST) then
-    ret:AddScript(string.format("createDiagonalPawnAnimation(%s)", point:GetString()))
+  -- this includes:
+  -- * pods (collects pod)
+  -- * acid (collects acid off board, ignore when its acid water)
+  -- fire, lava, and acid water are not problems as the mech's status is fixed after moving
   else
-    -- anywhere else directly to the space
-    ret:AddScript(string.format("Pawn:SetSpace(%s)", point:GetString()))
+    local terrain = Board:GetTerrain(point)
+    if Board:IsPod(point) or (Board:IsAcid(point) and terrain ~= TERRAIN_WATER) then
+      ret:AddScript(string.format("createDiagonalPawnAnimation(%s)", point:GetString()))
+    else
+      -- if the pawn is on fire, clear before entering a forest
+      local fire, acid
+      if terrain == TERRAIN_FOREST then
+        fire = false
+      end
+      -- if the pawn is ACID, clear before entering water
+      if terrain == TERRAIN_WATER and not Board:IsAcid(point) then
+        acid = false
+      end
+      if fire == false or acid == false then
+        ret:AddScript(string.format("setDiagonalPawnStatus(%s,%s)", boolString(fire), boolString(acid)))
+      end
+
+      -- anywhere else directly to the space
+      ret:AddScript(string.format("Pawn:SetSpace(%s)", point:GetString()))
+    end
   end
 
   -- add delay so the pawn animates
@@ -187,7 +230,8 @@ function diagonal.addMove(ret, p1, p2)
   ret:AddDelay(0.1)
 
   -- distance of 1 has less work to do
-  local wasFire = false
+  local wasFire = nil
+  local wasAcid = nil
   if distance > 1 then
     -- normalize the offset to be distance of 1
     offset = diagonal.minimize(offset)
@@ -197,6 +241,7 @@ function diagonal.addMove(ret, p1, p2)
 
     -- store fire as traveling through water may accidently unset it
     wasFire = Pawn:IsFire()
+    wasAcid = Pawn:IsAcid()
 
     -- iterate through points in the path, steping to each point
     local point = p1 + offset
@@ -210,8 +255,8 @@ function diagonal.addMove(ret, p1, p2)
   ret:AddScript(string.format("Pawn:SetSpace(%s)", p2:GetString()))
 
   -- restore fire if needed
-  if wasFire then
-    ret:AddScript("setDiagonalPawnFire()")
+  if wasFire ~= nil or wasAcid ~= nil then
+    ret:AddScript(string.format("setDiagonalPawnStatus(%s,%s)", boolString(wasFire), boolString(wasAcid)))
   end
 
   -- add a normal move so it shows up in the tooltip
@@ -229,6 +274,7 @@ end
 function diagonal.getProjectileEnd(p1, p2, profile)
   profile = profile or PATH_PROJECTILE
 	local direction = diagonal.minimize(p2 - p1)
+  -- start target where the user clicked, saves work and allows selective phasing
 	local target = p2
 
 	while not Board:IsBlocked(target, profile) do
