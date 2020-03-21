@@ -158,9 +158,10 @@ function Chess_Knight_Move:GetTargetAreaExt(p1, move)
   end
 
   -- all four directions
+  local both = move > 1 and 3 or 1
   for dir = DIR_START, DIR_END do
-    -- both opposite axises
-    for d = 1, 3, 2 do
+    -- both opposite axises, only 1 axis if move is 1
+    for d = 1, both, 2 do
       -- direction of this movement
       local offset = DIR_VECTORS[dir] * 2 + DIR_VECTORS[(dir + d) % 4]
       local point = p1 + offset
