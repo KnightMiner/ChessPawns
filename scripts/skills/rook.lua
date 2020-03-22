@@ -434,7 +434,7 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
 
       -- check the achievement
       if achvTrigger:available("pawn_grenade") then
-        ret:AddScript(string.format("Chess_Castle_Charge:CheckAchievement(%s, %d)", landing:GetString(), dir))
+        ret:AddScript(string.format("Chess_Castle_Charge:CheckAchievement(%s, %s)", landing:GetString(), dir ~= nil and dir or "nil"))
       end
       -- increment pushes for achievement
       achvTrigger:checkPush(ret, target)
