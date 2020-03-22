@@ -15,9 +15,9 @@ return {
   Chess_Castle_Charge_B_UpgradeDescription = "Increases damage to by 2.",
 
   Chess_Spawn_Pawn_Name = "Spawn Pawn",
-  Chess_Spawn_Pawn_Description = "Deploy a pawn at the target location. You can have up to two pawns active at a time.",
-  Chess_Spawn_Pawn_Upgrade1 = "+1 Range",
-  Chess_Spawn_Pawn_A_UpgradeDescription = "Pawn spear range increased to 2.",
+  Chess_Spawn_Pawn_Description = "Deploy a pawn at the target location. You can have up to one pawn active at a time.",
+  Chess_Spawn_Pawn_Upgrade1 = "+1 Pawn",
+  Chess_Spawn_Pawn_A_UpgradeDescription = "Can have up to two active pawns at a time.",
   Chess_Spawn_Pawn_Upgrade2 = "Explosive",
   Chess_Spawn_Pawn_B_UpgradeDescription = "Pawns explode when killed, dealing 2 damage to adjacent tiles. Can target water and holes to cause an immediate explosion.",
 
@@ -29,7 +29,5 @@ return {
   Chess_Bishop_Charge_B_UpgradeDescription = "Increases damage to by 1.",
 
   Chess_Pawn_Spear_Name = "Pawn Spear",
-  Chess_Pawn_Spear_Description = "Strike a target at melee range with a spear, doing damage and pushing.",
-  Chess_Pawn_Spear_Upgrade1 = "+1 Range",
-  Chess_Pawn_Spear_A_UpgradeDescription = "Range increased to 2.",
+  Chess_Pawn_Spear_Description = "Strike a target at melee range with a spear, doing damage and pushing. Can attack diagonal targets, possibly taking their space."
 }

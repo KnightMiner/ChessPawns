@@ -99,12 +99,13 @@ Chess_Spawn_Pawn = Deployable:new {
   Class       = "Ranged",
   Limited     = 0,
   Damage      = 0,
-  PowerCost   = 2,
+  PowerCost   = 1,
   Upgrades    = 2,
   UpgradeCost = {2, 3},
   -- settings
   Deployed    = "Chess_Pawn",
   DeployedAlt = "Chess_Pawn_Alt",
+  Limit       = 1,
   -- effects
   Icon          = "weapons/chess_spawn_pawn.png",
   Projectile    = "effects/chess_shotup_pawn.png",
@@ -121,23 +122,21 @@ Chess_Spawn_Pawn = Deployable:new {
   }
 }
 
--- Range
+-- +1 Pawn
 Chess_Spawn_Pawn_A = Chess_Spawn_Pawn:new {
-  Deployed    = "Chess_Pawn_A",
-  DeployedAlt = "Chess_Pawn_A_Alt",
+  Limit    = 2,
   TipImage = {
   Unit          = Point(1,3),
   Target        = Point(1,1),
-  Enemy         = Point(3,1),
-  Second_Origin = Point(1,1),
-  Second_Target = Point(3,1),
+  Second_Origin = Point(1,3),
+  Second_Target = Point(3,3),
   }
 }
 
 -- Explosion
 Chess_Spawn_Pawn_B = Chess_Spawn_Pawn:new {
-  Deployed    = "Chess_Pawn_B",
-  DeployedAlt = "Chess_Pawn_B_Alt",
+  Deployed    = "Chess_Pawn_Explosive",
+  DeployedAlt = "Chess_Pawn_Explosive_Alt",
   TipImage = {
     Unit          = Point(2,3),
     Target        = Point(2,1),
@@ -151,20 +150,15 @@ Chess_Spawn_Pawn_B = Chess_Spawn_Pawn:new {
 
 -- Both
 Chess_Spawn_Pawn_AB = Chess_Spawn_Pawn_B:new {
-  Deployed    = "Chess_Pawn_AB",
-  DeployedAlt = "Chess_Pawn_AB_Alt"
+  Limit = 2
 }
 
 -- true if it deploys a alt colored pawn, false deploys a normal. Unset is not a pawn
 local CHESS_PAWNS = {
-  Chess_Pawn        = true,
-  Chess_Pawn_Alt    = false,
-  Chess_Pawn_A      = true,
-  Chess_Pawn_A_Alt  = false,
-  Chess_Pawn_B      = true,
-  Chess_Pawn_B_Alt  = false,
-  Chess_Pawn_AB     = true,
-  Chess_Pawn_AB_Alt = false,
+  Chess_Pawn               = true,
+  Chess_Pawn_Alt           = false,
+  Chess_Pawn_Explosive     = true,
+  Chess_Pawn_Explosive_Alt = false,
 }
 
 -- default pawn color for tooltips or if we cannot find the mech color
@@ -233,9 +227,16 @@ function Chess_Spawn_Pawn:GetSkillEffect(p1, target)
     end
   end
 
+  -- if the pawn will immediately explode, don't kill an old one
+  local pawnType = deployAlt and self.DeployedAlt or self.Deployed
+  local willExplode = helpers.pawnExplodes(pawnType) and Board:IsBlocked(target, PATH_GROUND)
+  if willExplode then
+    pawnCount = pawnCount - 1
+  end
+
   -- if we found 2 pawns, kill the oldest one
   -- skip in tooltips, we cap at 2 pawns (at most 2 actions)
-  if not helpers.isTooltip() and pawnCount >= 2 and pawnToBeDestroyed ~= nil then
+  if not helpers.isTooltip() and pawnCount >= self.Limit and pawnToBeDestroyed ~= nil then
     local space = pawnToBeDestroyed:GetSpace()
     local damage = SpaceDamage(space, DAMAGE_DEATH)
     damage.sAnimation = "explo_fire1"
@@ -253,7 +254,6 @@ function Chess_Spawn_Pawn:GetSkillEffect(p1, target)
 
   -- spawn the pawn
   local damage = SpaceDamage(target,0)
-  local pawnType = deployAlt and self.DeployedAlt or self.Deployed
   -- set the color based on the current mech's pallet
   if GAME and not helpers.isTooltip() then
     _G[pawnType].ImageOffset = getColor(mechId)
@@ -265,7 +265,7 @@ function Chess_Spawn_Pawn:GetSkillEffect(p1, target)
   ret:AddArtillery(damage, deployAlt and self.ProjectileAlt or self.Projectile)
 
   -- if targeting water with an explosive pawn, preview that explosion
-  if helpers.pawnExplodes(pawnType) and Board:IsBlocked(target, PATH_GROUND) then
+  if willExplode then
     previewer:AddDamage(SpaceDamage(target, 2))
     for dir = DIR_START, DIR_END do
       previewer:AddDamage(SpaceDamage(target + DIR_VECTORS[dir], 2))

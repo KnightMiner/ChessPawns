@@ -105,12 +105,18 @@ function mod:init()
       Icon =              {},
     }
   )
+  -- weapons
   sprites.addSprite("weapons", "chess_castle_charge")
   sprites.addSprite("weapons", "chess_knight_stomp")
   sprites.addSprite("weapons", "chess_spawn_pawn")
   sprites.addSprite("weapons", "chess_bishop_charge")
   sprites.addSprite("effects", "chess_shotup_pawn")
   sprites.addSprite("effects", "chess_shotup_pawn_alt")
+  sprites.addAnimation("effects", "chess_speardiag_U", {Base = "explospear1_0", PosX = -40, PosY = -24})
+  sprites.addAnimation("effects", "chess_speardiag_R", {Base = "explospear1_0", PosX = -46, PosY = -12})
+  sprites.addAnimation("effects", "chess_speardiag_D", {Base = "explospear1_0", PosX = -41, PosY = -12})
+  sprites.addAnimation("effects", "chess_speardiag_L", {Base = "explospear1_0", PosX = -42, PosY = -12})
+  -- trait icons
   sprites.addSprite("combat/icons", "icon_king_move")
   sprites.addSprite("combat/icons", "icon_knight_move")
   sprites.addSprite("combat/icons", "icon_rook_move")
@@ -118,6 +124,7 @@ function mod:init()
   sprites.addSprite("combat/icons", "icon_pawn_move")
   sprites.addSprite("combat/icons", "icon_pawn_move_explode")
   sprites.addSprite("combat/icons", "icon_empty_glow")
+  -- achievements
   local difficulties = {"easy", "normal", "hard"}
   sprites.addAchievement("chess_2_clear", difficulties)
   sprites.addAchievement("chess_3_clear", difficulties)

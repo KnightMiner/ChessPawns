@@ -121,7 +121,7 @@ Chess_Pawn = Pawn:new {
   Name = "Pawn Mech",
   DefaultTeam = TEAM_PLAYER,
   -- stats
-  Health = 1,
+  Health    = 1,
   MoveSpeed = 2,
   -- skills
   SkillList = { "Chess_Pawn_Spear" },
@@ -137,27 +137,14 @@ Chess_Pawn_Alt = Chess_Pawn:new { Image = "chess_pawn_alt" }
 AddPawnName("Chess_Pawn")
 AddPawnName("Chess_Pawn_Alt")
 
---- Pawns for Spawn Pawn Upgrade 1 - Spear range is upgraded, allowing 2 tiles to be reachable
-Chess_Pawn_A     = Chess_Pawn:new   { SkillList = { "Chess_Pawn_Spear_A" } }
-Chess_Pawn_A_Alt = Chess_Pawn_A:new { Image = "chess_pawn_alt" }
-AddPawnName("Chess_Pawn_A")
-AddPawnName("Chess_Pawn_A_Alt")
-
 --- Pawns for Spawn Pawn Upgrade 2 - Explode on death for 2 damage to surrounding units
-Chess_Pawn_B      = Chess_Pawn:new   {}
-Chess_Pawn_B_Alt = Chess_Pawn_B:new { Image = "chess_pawn_alt" }
-AddPawnName("Chess_Pawn_B")
-AddPawnName("Chess_Pawn_B_Alt")
+Chess_Pawn_Explosive     = Chess_Pawn:new {}
+Chess_Pawn_Explosive_Alt = Chess_Pawn_Explosive:new { Image = "chess_pawn_alt" }
+AddPawnName("Chess_Pawn_Explosive")
+AddPawnName("Chess_Pawn_Explosive_Alt")
 
---- Pawns for combined upgrades
-Chess_Pawn_AB     = Chess_Pawn_B:new  { SkillList = { "Chess_Pawn_Spear_A" } }
-Chess_Pawn_AB_Alt = Chess_Pawn_AB:new { Image = "chess_pawn_alt" }
-AddPawnName("Chess_Pawn_AB")
-AddPawnName("Chess_Pawn_AB_Alt")
-
-
--- chess pawn B explodes on death
-function Chess_Pawn_B:GetDeathEffect(p1)
+-- chess pawns explodes on death
+function Chess_Pawn_Explosive:GetDeathEffect(p1)
   local ret = SkillEffect()
 
   ret:AddSound("/impact/generic/explosion")
