@@ -143,7 +143,9 @@ Chess_Knight_Move = Skill:new {
    6: Knight x3 + threeleaper x2
 ]]
 function Chess_Knight_Move:GetTargetAreaExt(p1, move)
-  tips:Trigger(self.IsAttack and "Knight_Attack" or "Knight_Move", p1)
+  if not helpers.isTooltip() and not IsTestMechScenario() then
+    tips:Trigger(self.IsAttack and "Knight_Attack" or "Knight_Move", p1)
+  end
   local ret = PointList()
   local move = self.IsAttack and 2 or move or Pawn:GetMoveSpeed()
   if move < 1 then

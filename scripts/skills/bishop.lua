@@ -35,7 +35,9 @@ Chess_Bishop_Move = {}
   @return  Target area for this function
 ]]
 function Chess_Bishop_Move:GetTargetAreaExt(p1, move)
-  tips:Trigger("Bishop_Move", p1)
+  if not IsTestMechScenario() then
+    tips:Trigger("Bishop_Move", p1)
+  end
   local move = move or Pawn:GetMoveSpeed()
   local extra = 0
   if move > 7 then

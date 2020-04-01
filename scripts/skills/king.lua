@@ -45,7 +45,9 @@ end
 ]]
 Chess_King_Move = {}
 function Chess_King_Move:GetTargetAreaExt(p1, move)
-  tips:Trigger("King_Move", p1)
+  if not IsTestMechScenario() then
+    tips:Trigger("King_Move", p1)
+  end
   local ret = PointList()
 
   -- first upgrade increases both, after that only 1 is increased

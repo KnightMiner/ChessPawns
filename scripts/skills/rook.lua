@@ -31,7 +31,9 @@ tips:Add{
 Chess_Rook_Move = {}
 function Chess_Rook_Move:GetTargetAreaExt(p1, move)
   -- rook moves up to 7 in one direction, extra allows a second move on another axis
-  tips:Trigger("Rook_Move", p1)
+  if not IsTestMechScenario() then
+    tips:Trigger("Rook_Move", p1)
+  end
   local move = move or Pawn:GetMoveSpeed()
   local extra = 0
   if move > 7 then
