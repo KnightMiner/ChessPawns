@@ -324,10 +324,11 @@ function Chess_Knight_Smite:Squash(target, selfDamage)
   if achvTrigger:available("one_shot") and Board:IsPawnSpace(target) then
     -- must be at max health
     local pawn = Board:GetPawn(target)
-    if pawn:GetHealth() == cutils.GetPawnMaxHealth(pawn) then
-      -- must be a boss, but skip blobs and swarmers as they are too easy to kill
+    local maxHealth = cutils.GetPawnMaxHealth(pawn)
+    -- require max health to be 5 or more, removes cases of bosses with multiple parts that are easy to one shot (slime, swarmers)
+    if maxHealth >= 5 and pawn:GetHealth() == maxHealth then
       local type = pawn:GetType()
-      if type ~= "BlobBoss" and type ~= "lmn_SpitterBoss" and _G[type].Tier == TIER_BOSS then
+      if _G[type].Tier == TIER_BOSS then
         achvTrigger:trigger("one_shot")
       end
     end
