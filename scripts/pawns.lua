@@ -1,7 +1,9 @@
 local mod = mod_loader.mods[modApi.currentMod]
 local helpers = mod:loadScript("libs/helpers")
+local palettes = mod:loadScript("libs/customPalettes")
 
 ----Mechs----
+local pawnColor = palettes.getOffset("ChessWhite")
 
 --[[--
   Knight Mech: Prime focused on leap attacks
@@ -24,7 +26,7 @@ Chess_Knight = Pawn:new {
   MoveSkill = Chess_Knight_Move,
   -- display
   Image = "chess_knight",
-  ImageOffset = 3, -- yellow
+  ImageOffset = pawnColor,
   SoundLocation = "/mech/distance/dstrike_mech/",
   ImpactMaterial = IMPACT_METAL
 }
@@ -50,7 +52,7 @@ Chess_Rook = Pawn:new {
   MoveSkill = Chess_Rook_Move,
   -- display
   Image = "chess_rook",
-  ImageOffset = 3, -- yellow
+  ImageOffset = pawnColor,
   SoundLocation = "/mech/prime/rock_mech/",
   ImpactMaterial = IMPACT_METAL
 }
@@ -77,7 +79,7 @@ Chess_King = Pawn:new {
   MoveSkill = Chess_King_Move,
   -- display
   Image = "chess_king",
-  ImageOffset = 3, -- yellow
+  ImageOffset = pawnColor,
   SoundLocation = "/mech/prime/rock_mech/",
   ImpactMaterial = IMPACT_METAL
 }
@@ -104,7 +106,7 @@ Chess_Bishop = Pawn:new {
   MoveSkill = Chess_Bishop_Move,
   -- display
   Image = "chess_bishop",
-  ImageOffset = 3, -- yellow
+  ImageOffset = pawnColor,
   SoundLocation = "/mech/prime/rock_mech/",
   ImpactMaterial = IMPACT_METAL
 }
@@ -128,7 +130,7 @@ Chess_Pawn = Pawn:new {
   MoveSkill = Chess_Pawn_Move,
   -- display
   Image = "chess_pawn",
-  ImageOffset = 3, -- yellow
+  ImageOffset = pawnColor,
   SoundLocation = "/mech/distance/dstrike_mech/",
   ImpactMaterial = IMPACT_METAL
 }

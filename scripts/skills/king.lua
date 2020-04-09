@@ -2,6 +2,7 @@ local mod = mod_loader.mods[modApi.currentMod]
 local cutils = mod:loadScript("libs/CUtils")
 local diagonal = mod:loadScript("libs/diagonalMove")
 local helpers = mod:loadScript("libs/helpers")
+local palettes = mod:loadScript("libs/customPalettes")
 local previewer = mod:loadScript("weaponPreview/api")
 local tips = mod:loadScript("libs/tutorialTips")
 local trait = mod:loadScript("libs/trait")
@@ -163,9 +164,6 @@ local CHESS_PAWNS = {
   Chess_Pawn_Explosive_Alt = false,
 }
 
--- default pawn color for tooltips or if we cannot find the mech color
-local DEFAULT_COLOR = 3
-
 --[[--
   Gets the color of the mech
 
@@ -260,7 +258,7 @@ function Chess_Spawn_Pawn:GetSkillEffect(p1, target)
   if GAME and not helpers.isTooltip() then
     _G[pawnType].ImageOffset = getColor(mechId)
   else
-    _G[pawnType].ImageOffset = DEFAULT_COLOR
+    _G[pawnType].ImageOffset = palettes.getOffset("ChessWhite")
   end
 
   damage.sPawn = pawnType

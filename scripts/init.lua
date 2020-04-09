@@ -105,6 +105,22 @@ function mod:init()
       Icon =              {},
     }
   )
+
+  -- add palette
+  local palettes = self:loadScript("libs/customPalettes")
+  palettes.addPalette({
+    ID = "ChessWhite",
+    Name = "Chess White",
+    PlateHighlight = {170, 245, 255},
+    PlateLight     = {255, 255, 255},
+    PlateMid       = {192, 208, 216},
+    PlateDark      = {110, 133, 141},
+    PlateOutline   = { 36,  37,  49},
+    PlateShadow    = { 43,  50,  56},
+    BodyColor      = { 89,  96, 103},
+    BodyHighlight  = {175, 175, 175},
+  })
+
   -- weapons
   sprites.addSprite("weapons", "chess_castle_charge")
   sprites.addSprite("weapons", "chess_knight_stomp")
