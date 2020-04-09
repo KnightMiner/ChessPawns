@@ -92,6 +92,7 @@ function mod:init()
     },
     {
       Name = "chess_pawn",
+      NoHanger = true,
       Default =           { PosX = -12, PosY = 0 },
       Animated =          { PosX = -12, PosY = 0, NumFrames = 4 },
       Death =             { PosX = -12, PosY = 0, NumFrames = 5, Time = 0.09, Loop = false },
@@ -99,6 +100,7 @@ function mod:init()
     },
     {
       Name = "chess_pawn_alt",
+      NoHanger = true,
       Default =           { PosX = -12, PosY = 0 },
       Animated =          { PosX = -12, PosY = 0, NumFrames = 4 },
       Death =             { PosX = -12, PosY = 0, NumFrames = 5, Time = 0.09, Loop = false },
