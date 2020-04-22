@@ -20,6 +20,26 @@ function mod:loadScript(path)
   return require(self.scriptPath..path)
 end
 
+--[[--
+  Fixes skill names in pawns
+
+  @param name  Weapon name to fix
+]]
+function fixWeaponTexts(name)
+  -- get name and description
+  local base = _G[name]
+  base.Name = Weapon_Texts[name .. "_Name"]
+  base.Description = Weapon_Texts[name .. "_Description"]
+  -- upgrade A description
+  for _, key in ipairs({"_A", "_B"}) do
+    local fullName = name .. key
+    local upgrade = _G[fullName]
+    if upgrade ~= nil then
+      upgrade.UpgradeDescription =  Weapon_Texts[fullName .. "_UpgradeDescription"]
+    end
+  end
+end
+
 function mod:metadata()
   modApi:addGenerationOption(
     "rookRockThrow",
@@ -198,6 +218,14 @@ function mod:init()
       name = texts.Chess_Bishop_Charge_Name,
       desc = "Adds Bishop Charge to the store."
     })
+  end
+
+  -- weapon texts
+  for _, weapon in ipairs({
+    "Chess_Knight_Smite", "Chess_Castle_Charge", "Chess_Spawn_Pawn",
+    "Chess_Bishop_Charge", "Chess_Pawn_Spear"
+  }) do
+    fixWeaponTexts(weapon)
   end
 end
 
