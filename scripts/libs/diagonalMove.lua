@@ -101,8 +101,8 @@ end
   Sets the color on the pawn based on the current pallet colors
 ]]
 function diagonal.setColor()
-  -- color missing if no region or in a tooltip
-  local color = saveData.getPawnKey(Pawn, "offset")
+  -- color, missing if no savedata in a tooltip
+  local color = saveData.safeGet(GameData, "current", "colors", Pawn:GetId()+1)
   if color ~= nil then
     -- regular pawn
     local type = Pawn:GetType()

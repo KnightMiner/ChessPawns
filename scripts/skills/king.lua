@@ -170,11 +170,7 @@ local CHESS_PAWNS = {
   @return Mech color, or DEFAULT_COLOR if missing
 ]]
 local function getColor(pawnId)
-  local color = nil
-  if type(GameData) == 'table' and type(GameData.current) == 'table' and type(GameData.current.colors) == 'table' then
-    color = GameData.current.colors[pawnId+1]
-  end
-  return color or DEFAULT_COLOR
+  return saveData.safeGet(GameData, "current", "colors", pawnId+1) or palettes.getOffset("ChessWhite")
 end
 
 -- Allows targeting water and holes instead of just land
