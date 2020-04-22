@@ -1,7 +1,6 @@
 local mod = mod_loader.mods[modApi.currentMod]
 local config = mod.config
 local achvTrigger = mod:loadScript("achievementTriggers")
-local cutils = mod:loadScript("libs/CUtils")
 local diagonal = mod:loadScript("libs/diagonalMove")
 local helpers = mod:loadScript("libs/helpers")
 local previewer = mod:loadScript("weaponPreview/api")
@@ -271,7 +270,7 @@ function Chess_Castle_Charge:AddRock(space)
   -- start by removing the mountain
   local mountainHealth = 0
   if Board:GetTerrain(space) == TERRAIN_MOUNTAIN then
-    mountainHealth = cutils.GetTileHealth(Board, space)
+    mountainHealth = Board:GetHealth(space)
     Board:SetTerrain(space, TERRAIN_RUBBLE)
   end
 
@@ -283,7 +282,7 @@ function Chess_Castle_Charge:AddRock(space)
   -- then add the mountain back if we had one
   if mountainHealth > 0 then
     Board:SetTerrain(space, TERRAIN_MOUNTAIN)
-    cutils.SetTileHealth(Board, space, mountainHealth)
+    Board:SetHealth(space, mountainHealth, 2)
   end
 end
 

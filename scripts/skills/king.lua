@@ -1,9 +1,9 @@
 local mod = mod_loader.mods[modApi.currentMod]
-local cutils = mod:loadScript("libs/CUtils")
 local diagonal = mod:loadScript("libs/diagonalMove")
 local helpers = mod:loadScript("libs/helpers")
 local palettes = mod:loadScript("libs/customPalettes")
 local previewer = mod:loadScript("weaponPreview/api")
+local saveData = mod:loadScript("libs/saveData")
 local tips = mod:loadScript("libs/tutorialTips")
 local trait = mod:loadScript("libs/trait")
 
@@ -204,15 +204,22 @@ function Chess_Spawn_Pawn:GetSkillEffect(p1, target)
   -- if true, we deploy the alternate color pawn
   local deployAlt = false
   local mechId = Pawn:GetId()
+
   -- determine if we need to kill an existing pawn
   local pawnToBeDestroyed = nil
   local pawnCount = 0
   local pawns = extract_table(Board:GetPawns(TEAM_PLAYER))
+  -- fetch pawn owners from save data
+  local pawnOwners
+  local skipOwnerCheck = saveData.dataUnavailable()
+  if not skipOwnerCheck then
+    pawnOwners = saveData.getAllPawns("owner")
+  end
   -- simply iterate all pawns
   for _, pawnId in ipairs(pawns) do
     -- owner must be this mech, though skip that check in tooltips (owner not fully set)
     local pawn = Board:GetPawn(pawnId)
-    if helpers.isTooltip() or cutils.GetPawnOwner(pawn) == mechId then
+    if skipOwnerCheck or pawnOwners[pawn:GetId()] == mechId then
       -- pawn must be a chess pawn
       local pawnColor = CHESS_PAWNS[pawn:GetType()]
       if pawnColor ~= nil then

@@ -7,7 +7,7 @@
 -----------------------------------------------------------------------
 
 local mod = mod_loader.mods[modApi.currentMod]
-local cutils = mod:loadScript("libs/CUtils")
+local saveData = require(mod.scriptPath .. "libs/saveData")
 local diagonal = {}
 
 --[[--
@@ -85,16 +85,6 @@ function createDiagonalPawnAnimation(point)
   Board:AddPawn(pawn, point)
 end
 
---- Temporary workaround until the cutils fix is merged to make Pawn:SetFire(true) not affect the board
-function setDiagonalPawnStatus(fire, acid)
-  if fire ~= nil and fire ~= Pawn:IsFire() then
-    cutils.SetPawnFire(Pawn, fire)
-  end
-  if acid ~= nil and acid ~= Pawn:IsAcid() then
-    cutils.SetPawnAcid(Pawn, acid)
-  end
-end
-
 --[[--
   Converts a boolean to a string to use in string.format
 ]]
@@ -108,28 +98,20 @@ local function boolString(bool)
 end
 
 --[[--
-  Script function to remove a item from the board and move the pawn to that place.
-  Assumes the item is stored to restore it later
-
-  @param point  Point containing an item
-]]
-function removeDiagonalItem(point)
-  cutils.TileRemoveItem(Board, point)
-  Pawn:SetSpace(point)
-end
-
---[[--
   Sets the color on the pawn based on the current pallet colors
 ]]
 function diagonal.setColor()
-  local color = cutils.GetPawnColor(Pawn)
-  -- regular pawn
-  local type = Pawn:GetType()
-  local colorType = "Diagonal_" .. type
-  if _G[colorType] then _G[colorType].ImageOffset = color end
-  -- submerged pawn
-  colorType = "DiagonalW_" .. type
-  if _G[colorType] then _G[colorType].ImageOffset = color end
+  -- color missing if no region or in a tooltip
+  local color = saveData.getPawnKey(Pawn, "offset")
+  if color ~= nil then
+    -- regular pawn
+    local type = Pawn:GetType()
+    local colorType = "Diagonal_" .. type
+    if _G[colorType] then _G[colorType].ImageOffset = color end
+    -- submerged pawn
+    colorType = "DiagonalW_" .. type
+    if _G[colorType] then _G[colorType].ImageOffset = color end
+  end
 end
 
 --[[--
@@ -141,10 +123,12 @@ end
 ]]
 function diagonal.addStep(ret, point)
   -- items cause problems for any pawn on the space, so temporarily remove them and add back later
-  local item = nil
+  --local item = nil
   if Board:IsItem(point) then
-    item = cutils.TileGetItemName(Board, point)
-    ret:AddScript(string.format("removeDiagonalItem(%s)", point:GetString()))
+    -- temporarily disabled as I lack a way to remove an item
+    -- item = saveData.getSpaceKey("item")
+    -- remove item
+    ret:AddScript("Pawn:SetSpace(Point(-1,-1))")
 
   -- on tiles where we might interact with the board, add a fake pawn for animation
   -- this includes:
@@ -159,16 +143,12 @@ function diagonal.addStep(ret, point)
       -- if the pawn is on fire, clear before entering a forest
       local fire, acid
       if terrain == TERRAIN_FOREST then
-        fire = false
+        ret:AddScript("Pawn:SetFire(false)")
       end
       -- if the pawn is ACID, clear before entering water
       if terrain == TERRAIN_WATER and not Board:IsAcid(point) then
-        acid = false
+        ret:AddScript("Pawn:SetAcid(false)")
       end
-      if fire == false or acid == false then
-        ret:AddScript(string.format("setDiagonalPawnStatus(%s,%s)", boolString(fire), boolString(acid)))
-      end
-
       -- anywhere else directly to the space
       ret:AddScript(string.format("Pawn:SetSpace(%s)", point:GetString()))
     end
@@ -178,9 +158,9 @@ function diagonal.addStep(ret, point)
   ret:AddDelay(0.1)
 
   -- restore the item, this does not trigger as there is no delay in the next call
-  if item then
-    ret:AddScript(string.format("Board:SetItem(%s,'%s')", (point):GetString(), item))
-  end
+  -- if item then
+  --   ret:AddScript(string.format("Board:SetItem(%s,'%s')", point:GetString(), item))
+  -- end
 end
 
 --[[--
@@ -254,9 +234,12 @@ function diagonal.addMove(ret, p1, p2)
   -- move the actual pawn
   ret:AddScript(string.format("Pawn:SetSpace(%s)", p2:GetString()))
 
-  -- restore fire if needed
-  if wasFire ~= nil or wasAcid ~= nil then
-    ret:AddScript(string.format("setDiagonalPawnStatus(%s,%s)", boolString(wasFire), boolString(wasAcid)))
+  -- restore fire/acid if needed
+  if wasFire ~= nil then
+    ret:AddScript("Pawn:SetFire(false)", boolString(wasFire))
+  end
+  if wasAcid ~= nil then
+    ret:AddScript("Pawn:SetAcid(false)", boolString(wasAcid))
   end
 
   -- add a normal move so it shows up in the tooltip

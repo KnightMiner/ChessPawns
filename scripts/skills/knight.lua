@@ -1,9 +1,9 @@
 local mod = mod_loader.mods[modApi.currentMod]
 local config = mod.config
 local achvTrigger = mod:loadScript("achievementTriggers")
-local cutils = mod:loadScript("libs/CUtils")
 local helpers = mod:loadScript("libs/helpers")
 local previewer = mod:loadScript("weaponPreview/api")
+local saveData = mod:loadScript("libs/saveData")
 local tips = mod:loadScript("libs/tutorialTips")
 local trait = mod:loadScript("libs/trait")
 
@@ -28,6 +28,21 @@ tips:Add{
 }
 
 --[[--
+  Gets the max health for a pawn. Will be a little low in the mech tester
+
+  @param pawn  Pawn to get health for
+  @return Max health for the pawn.
+]]
+local function getPawnMaxHealth(pawn)
+  -- if no region, use base health, won't consider pilot and other upgrades but better than nothing
+  if saveData.dataUnavailable() then
+    return _G[pawn:GetType()]:GetHealth()
+  end
+  -- fetch from save data if available
+  return saveData.getPawnKey(pawn, "max_health")
+end
+
+--[[--
   Determines the equivelent health after applying status effects for a unit, used for attack strength comparisons
 
   @param pawn    Pawn of focus
@@ -39,7 +54,7 @@ local function getHealthEquivelent(pawn, useMax)
   -- no max returns current health
   local health
   if useMax then
-    health = cutils.GetPawnMaxHealth(pawn)
+    health = getPawnMaxHealth(pawn)
   else
     health = pawn:GetHealth()
   end
@@ -85,7 +100,7 @@ local function pointValid(point, isAttack, maxDamage)
 
   -- can target mountains provided they are damaged
   if Board:GetTerrain(point) == TERRAIN_MOUNTAIN then
-    if cutils.GetTileHealth(Board, point) == 1 then
+    if Board:GetHealth(point) == 1 then
       return true
     else
       previewer:AddDesc(point, "knight_mountain")
@@ -326,7 +341,7 @@ function Chess_Knight_Smite:Squash(target, selfDamage)
   if achvTrigger:available("one_shot") and Board:IsPawnSpace(target) then
     -- must be at max health
     local pawn = Board:GetPawn(target)
-    local maxHealth = cutils.GetPawnMaxHealth(pawn)
+    local maxHealth = getPawnMaxHealth(pawn)
     -- require max health to be 5 or more, removes cases of bosses with multiple parts that are easy to one shot (slime, swarmers)
     if maxHealth >= 5 and pawn:GetHealth() == maxHealth then
       local type = pawn:GetType()
@@ -362,7 +377,7 @@ function Chess_Knight_Smite:GetSkillEffect(p1, p2)
 
     -- add damage for display at both locations
     previewer:AddDamage(SpaceDamage(p1, selfDamage))
-    previewer:AddDamage(SpaceDamage(p2, DAMAGE_DEATH))
+    --previewer:AddDamage(SpaceDamage(p2, DAMAGE_DEATH))
 
     -- run kill script
     ret:AddScript("Chess_Knight_Smite:Squash("..p2:GetString()..","..selfDamage..")")

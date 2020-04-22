@@ -1,6 +1,5 @@
 local mod = mod_loader.mods[modApi.currentMod]
 local achvTrigger = mod:loadScript("achievementTriggers")
-local cutils = mod:loadScript("libs/CUtils")
 local helpers = mod:loadScript("libs/helpers")
 local previewer = mod:loadScript("weaponPreview/api")
 local trait = mod:loadScript("libs/trait")
@@ -115,7 +114,7 @@ function Chess_Pawn_Spear:GetSkillEffect(p1, p2)
     -- mountains need to be at 1 health
     local terrain = Board:GetTerrain(p2)
     if terrain == TERRAIN_MOUNTAIN then
-      willKill = cutils.GetTileHealth(Board, p2) == 1
+      willKill = Board:GetHealth(p2) == 1
     else
       -- pawns at 1 health
       local target = Board:GetPawn(p2)
