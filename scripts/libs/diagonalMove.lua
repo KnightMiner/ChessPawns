@@ -236,10 +236,10 @@ function diagonal.addMove(ret, p1, p2)
 
   -- restore fire/acid if needed
   if wasFire ~= nil then
-    ret:AddScript("Pawn:SetFire(false)", boolString(wasFire))
+    ret:AddScript(string.format("Pawn:SetFire(false)", boolString(wasFire)))
   end
   if wasAcid ~= nil then
-    ret:AddScript("Pawn:SetAcid(false)", boolString(wasAcid))
+    ret:AddScript(string.format("Pawn:SetAcid(false)", boolString(wasAcid)))
   end
 
   -- add a normal move so it shows up in the tooltip
