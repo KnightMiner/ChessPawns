@@ -143,7 +143,7 @@ function Chess_Bishop_Charge:GetTargetZone(p1, p2)
   local direction = diagonal.minimize(p2 - p1)
   -- add spaces moving back to the mech
   local space = p2 - direction
-  while space ~= p1 and Board:IsValid(space) and not Board:IsBlocked(space, PATH_FLYER) do
+  while space ~= p1 and Board:IsValid(space) and not Board:IsBlocked(space, PATH_PROJECTILE) do
     ret:push_back(space)
     space = space - direction
   end
