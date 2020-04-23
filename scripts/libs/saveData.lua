@@ -1,3 +1,10 @@
+-------------------------------------------------------------------------------
+-- Save Data reading lbrary
+-- v0.2
+-- https://github.com/KnightMiner/ITB-KnightUtils/blob/master/libs/saveData.lua
+-------------------------------------------------------------------------------
+-- Contains helpers to make it easier to read information from saveData.lua
+-------------------------------------------------------------------------------
 local saveData = {}
 
 --- Size of boards in tooltips
