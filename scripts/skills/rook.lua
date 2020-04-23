@@ -147,6 +147,7 @@ Chess_Castle_Charge = Skill:new {
   PowerCost = 1,
   Upgrades = 2,
   UpgradeCost = {1, 3},
+	ZoneTargeting = ZONE_DIR,
   -- settings
   Damage = 1,
   Push = false,

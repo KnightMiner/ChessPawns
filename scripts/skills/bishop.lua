@@ -1,4 +1,5 @@
 local mod = mod_loader.mods[modApi.currentMod]
+local config = mod.config
 local achvTrigger = mod:loadScript("achievementTriggers")
 local diagonal = mod:loadScript("libs/diagonalMove")
 local helpers = mod:loadScript("libs/helpers")
@@ -133,6 +134,34 @@ Chess_Bishop_Charge = Chess_Castle_Charge:new {
   }
 }
 Chess_Bishop_Charge.TipImage = Chess_Bishop_Charge.TipImages.Mountain
+
+-- vanilla does not support diagonal direciton, plus phase makes things a bit more difficult
+function Chess_Bishop_Charge:GetTargetZone(p1, p2)
+  local ret = PointList()
+  ret:push_back(p2)
+  -- proceed away from the point until the first blockage
+  local direction = diagonal.minimize(p2 - p1)
+  -- add spaces moving back to the mech
+  local space = p2 - direction
+  while space ~= p1 and Board:IsValid(space) and not Board:IsBlocked(space, PATH_FLYER) do
+    ret:push_back(space)
+    space = space - direction
+  end
+  -- move forwards if the selected space is not blocked
+  if not Board:IsBlocked(p2, PATH_PROJECTILE) then
+    space = p2 + direction
+    while Board:IsValid(space) and not Board:IsBlocked(space, PATH_PROJECTILE) do
+      ret:push_back(space)
+      space = space + direction
+    end
+    -- if the blockage is targetable, add it
+    if Board:IsPawnSpace(space) and not Board:GetPawn(space):IsGuarding()
+        or config.rookRockThrow and Board:GetTerrain(space) == TERRAIN_MOUNTAIN then
+      ret:push_back(space)
+    end
+  end
+  return ret
+end
 
 -- Upgrade 1: Phase upgrade
 Chess_Bishop_Charge_A = Chess_Bishop_Charge:new {
