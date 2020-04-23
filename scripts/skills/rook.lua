@@ -263,31 +263,6 @@ function Chess_Castle_Charge:GetTargetArea(start)
 end
 
 --[[--
-  Spawns in a rock on a mountain, as vanilla does not like spawning units on mountains
-
-  @param  space  Point to place the rock
-]]
-function Chess_Castle_Charge:AddRock(space)
-  -- start by removing the mountain
-  local mountainHealth = 0
-  if Board:GetTerrain(space) == TERRAIN_MOUNTAIN then
-    mountainHealth = Board:GetHealth(space)
-    Board:SetTerrain(space, TERRAIN_RUBBLE)
-  end
-
-  -- spawn in the rock
-  local rock = SpaceDamage(space, 0)
-  rock.sPawn = "RockThrown"
-  Board:DamageSpace(rock)
-
-  -- then add the mountain back if we had one
-  if mountainHealth > 0 then
-    Board:SetTerrain(space, TERRAIN_MOUNTAIN)
-    Board:SetHealth(space, mountainHealth, 2)
-  end
-end
-
---[[--
   Checks if the current charge attack would trigger the achievement
 
   @param point    Point the pawn lands
@@ -359,9 +334,6 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
     end
 
     -- toss used for either case
-    local toss = PointList()
-    toss:push_back(target)
-    toss:push_back(landing)
 
     -- set direction to use it in the achievment check
     local dir
@@ -371,28 +343,28 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
 
     -- mountains toss a rock
     if isMountain then
-      -- damage the mountain, then spawn and throw the rock
+      -- damage the mountain
       local damage = SpaceDamage(target, self.Damage)
       if moved or isDiagonal then
         ret:AddDamage(damage)
       else
         ret:AddMelee(newPos, damage)
       end
-      ret:AddScript(string.format("Chess_Castle_Charge:AddRock(%s)", target:GetString()))
-      ret:AddLeap(toss, FULL_DELAY)
+      -- add a rocck firing from the mountain
+      local rock = SpaceDamage(landing, 0)
+      rock.sPawn = "RockThrown"
+      ret:AddArtillery(target, rock, "effects/shotdown_rock.png", FULL_DELAY)
       ret:AddBounce(landing, 3)
       ret:AddSound("/impact/dynamic/rock")
-
-      -- add a fake rock for the preview
-      local fakeRock = SpaceDamage(landing, 0)
-      fakeRock.sPawn = "RockThrown"
-      previewer:AddDamage(fakeRock)
     else
       -- fake punch for pawn animation
       if not moved and not isDiagonal then
         ret:AddMelee(newPos, SpaceDamage(target, 0))
       end
-      -- otherwise its a pawn, toss the unit
+      -- toss the pawn
+      local toss = PointList()
+      toss:push_back(target)
+      toss:push_back(landing)
       ret:AddLeap(toss, FULL_DELAY)
       ret:AddBounce(landing, 3)
 
@@ -400,7 +372,7 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
       if achvTrigger:available("pawn_grenade") then
         ret:AddScript(string.format("Chess_Castle_Charge:CheckAchievement(%s, %s)", landing:GetString(), dir ~= nil and dir or "nil"))
       end
-      -- increment pushes for achievement
+      -- increment pushes for other achievement
       achvTrigger:checkPush(ret, target)
 
       -- add damage where the target used to be. Used for damage for the weapon preview
