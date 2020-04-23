@@ -1,7 +1,9 @@
 
 -----------------------------------------------------------------------------
--- Weapon Preview v2.1 - code library
+-- Weapon Preview v2.2 - code library
 --[[-------------------------------------------------------------------------
+	* paths modified for current mod
+	
 	API for
 	 - enhancing preview of weapons/move/repair skills with
 		- damage marks
@@ -10,6 +12,11 @@
 		- tile images
 		- animations
 		- emitters
+	
+	
+	 library dependencies:
+	=======================
+	modApiExt - manual init/load
 	
 	
 	 request api:
@@ -142,7 +149,7 @@
 	------+---------+-----------------
 	
 	
-	previewer:AddEmitter(tile, emitter)		(not implemented)
+	previewer:AddEmitter(tile, emitter)
 	===================================
 	plays an animation at a tile.
 	
@@ -153,31 +160,41 @@
 	--------+---------+---------------
 	
 	
+	previewer:ClearMarks()
+	======================
+	not intended for normal use,
+	but it can be used to clear
+	all currently added marks if needed.
+	
+	
 ]]---------------------------------------------------------------------------
 
 
 local mod = mod_loader.mods[modApi.currentMod]
 local path = mod.scriptPath
-local modUtils = require(path .."weaponPreview/lib/getModUtils")
+local modUtils = require(path .."modApiExt/modApiExt")
 local isTipImage = require(path .."weaponPreview/lib/isTipImage")
 local selected = require(path .."weaponPreview/lib/selected")
 local highlighted = require(path .."weaponPreview/lib/highlighted")
+local spaceEmitter = require(path .."weaponPreview/lib/spaceEmitter")
 
 local this = {}
 local loaded
-local marker = {area = {}, effect = {}}
+local marker = {area = {weapon = {start = 0}}, effect = {weapon = {start = 0}}}
 local marks = marker.area
-local weapon = {start = 0}
 local frame = -1
 local a = ANIMS
 local ignoreCall
+local taggedSkills = {}
+local doMarkTile = {}
+
 
 local function isMarkIgnored()
 	return ignoreCall or isTipImage() or not selected:Get()
 end
 
 local function isMarkUnavailable()
-	return isMarkIgnored() or frame ~= weapon.start
+	return marks == nil or isMarkIgnored() or frame ~= marks.weapon.start
 end
 
 function this:AddDamage(d, duration)
@@ -309,8 +326,32 @@ function this:AddAnimation(p, anim)
 	})
 end
 
-function this:AddEmitter(p, emitter)
-	-- not implemented
+function this:AddEmitter(p, emitter, duration)
+	if isMarkUnavailable() then return end
+	
+	assert(type(p) == 'userdata')
+	assert(type(p.x) == 'number')
+	assert(type(p.y) == 'number')
+	assert(type(emitter) == 'string')
+	local base = _G[emitter]
+	
+	assert(base)
+	assert(duration == nil or type(duration) == 'number')
+	
+	if not _G[emitter .. mod.id] then
+		_G[emitter .. mod.id] = base:new{
+			timer = .017,
+			birth_rate = base.birth_rate,
+			burst_count = base.burst_count
+		}
+	end
+	
+	table.insert(marks, {
+		fn = 'DamageSpace',
+		emitter = emitter,
+		data = {spaceEmitter(p, emitter .. mod.id)},
+		duration = duration
+	})
 end
 
 function this:AddDelay(duration)
@@ -335,57 +376,70 @@ end
 
 local function init()
 	-- inject code into all GetTargetArea and GetSkillEffect functions
-	for i, v in pairs(_G) do
-		if type(v) == 'table' then
+	for skillId, skill in pairs(_G) do
+		if type(skill) == 'table' then
 			
-			local function addFunc(fn, markType)
+			local function addFunc(funcName, markType)
 				local function addWeapon(root)
 					
 					-- reset weapon if at root and time mismatch.
-					if (not root or list_contains(root, i)) and weapon.start ~= frame then
-						weapon = {root = i, start = frame}
-						marker[markType] = {}
+					if (not root or list_contains(root, skillId)) and marks.weapon.start ~= frame then
+						marker[markType] = {weapon = {root = skillId, start = frame}}
 					end
 					
 					-- only add weapon if the root skill matches armed weapon id.
-					if (not root or list_contains(root, weapon.root)) and weapon.start == frame then
-						weapon[#weapon+1] = i
+					if (not root or list_contains(root, marks.weapon.root)) and marker[markType].weapon.start == frame then
+						table.insert(marker[markType].weapon, skillId)
 					end
 				end
 				
-				local old = v[fn]
-				v[fn] = function(self, p, ...)
+				local old = skill[funcName]
+				skill[funcName] = function(self, p, ...)
+					local id = funcName .. markType
 					
-					local selected = selected:Get()
-					if not isMarkIgnored() and selected:GetSpace() == p then
-						local armedId = selected:GetArmedWeaponId()
-						
-						if armedId == 0 then
-							addWeapon{'Move'}
-						elseif armedId == 50 then
-							-- not sure if Skill_Repair_A is ever called.
-							addWeapon{'Skill_Repair', 'Skill_Repair_A', 'Skill_Repair_Power', 'Skill_Repair_Punch'}
-						else
-							addWeapon()
-						end
+					if not taggedSkills[id] then
+						taggedSkills[id] = true
 						
 						marks = marker[markType]
+						local selected = selected:Get()
+						
+						if not isMarkIgnored() and selected:GetSpace() == p then
+							local armedId = selected:GetArmedWeaponId()
+							
+							if armedId == 0 then
+								addWeapon{'Move'}
+							elseif armedId == 50 then
+								-- not sure if Skill_Repair_A is ever called.
+								addWeapon{'Skill_Repair', 'Skill_Repair_A', 'Skill_Repair_Power', 'Skill_Repair_Punch'}
+							else
+								addWeapon()
+							end
+							
+							marks = marker[markType]
+						end
 					end
 					
-					return old(self, p, ...)
+					local result = old(self, p, ...)
+					
+					marks = nil
+					
+					return result
 				end
 			end
 			
-			if type(v.GetTargetArea) == 'function' then
+			if type(skill.GetTargetArea) == 'function' then
 				addFunc('GetTargetArea', 'area')
 			end
 			
-			if type(v.GetSkillEffect) == 'function' then
+			if type(skill.GetSkillEffect) == 'function' then
 				addFunc('GetSkillEffect', 'effect')
 			end
 		end
 	end
 end
+
+-- TODO: use the modsInitialzied hook instead?
+-- Would require a newer mod loader.
 
 -- init after all mods have been initialized.
 local modApiFinalize = modApi.finalize
@@ -415,12 +469,18 @@ local function createAnim(anim)
 end
 
 local function clearMarks()
-	marker.area = {}
-	marker.effect = {}
+	marker.area = {weapon = {start = 0}}
+	marker.effect = {weapon = {start = 0}}
 end
 
 local function nextFrame()
 	frame = frame + 1
+	doMarkTile = {}
+	taggedSkills = {}
+end
+
+function this:ClearMarks()
+	clearMarks()
 end
 
 function this:load()
@@ -434,20 +494,26 @@ function this:load()
 	modApi:addMissionStartHook(clearMarks)
 	modApi:addTestMechEnteredHook(clearMarks)
 	modApi:addPreLoadGameHook(clearMarks)
-	modUtils():addPawnDeselectedHook(clearMarks)
+	modUtils:addPawnDeselectedHook(clearMarks)
 	
 	modApi:addMissionUpdateHook(function()
 		
 		local selected = selected:Get()
-		if not selected then clearMarks(); nextFrame(); return end
-		if selected:GetArmedWeaponId() == -1 then clearMarks(); nextFrame(); return end
+		
+		if not selected or selected:GetArmedWeaponId() == -1 then
+			clearMarks()
+			nextFrame()
+			
+			return
+		end
 		
 		for _, markType in ipairs{'area', 'effect'} do
+			
 			local marker = marker[markType]
 			marker.loop = marker.loop ~= false
 			
 			local t = 0
-			local t1 = frame - weapon.start -- time since start
+			local t1 = frame - marker.weapon.start -- time since start
 			if marker.loop then
 				t1 = marker.length and frame % marker.length or 0
 			end
@@ -455,7 +521,41 @@ function this:load()
 			for _, mark in ipairs(marker) do
 				ignoreCall = true
 				
-				if markType == 'area' or list_contains(extract_table(_G[weapon.root]:GetTargetArea(selected:GetSpace())), highlighted:Get()) then
+				local doMark
+				
+				if markType == 'area' then
+					doMark = true
+				elseif markType == 'effect' then
+					local selectedTile = selected:GetSpace()
+					local cursorTile = highlighted:Get() -- mouseTile() -- post mod loader 2.4.0
+					local markId = marker.weapon.root .."_p".. p2idx(selectedTile)
+					
+					doMark = doMarkTile[markId]
+					
+					-- we have not cached this yet
+					if doMark == nil then
+						-- default to false, and change to true if we find a match.
+						doMark = false
+						
+						if cursorTile then
+							local targetArea = _G[marker.weapon.root]:GetTargetArea(selectedTile)
+							
+							-- let's see if it is faster not to extract the table.
+							for i = 1, targetArea:size() do
+								if cursorTile == targetArea:index(i) then
+									
+									doMark = true
+									break
+								end
+							end
+						end
+					end
+					
+					-- cache result.
+					doMarkTile[markId] = doMark
+				end
+				
+				if doMark then
 					if mark.fn then
 						local duration = mark.duration and mark.duration * 60 or INT_MAX - t
 						if t <= t1 and t1 <= t + duration then
@@ -466,7 +566,10 @@ function this:load()
 								local f = 1 + math.floor((start % duration) * a[mark.anim].NumFrames / duration)
 								mark.data[2] = mark.anim .. mod.id .. f
 							end
-							Board[mark.fn](Board, unpack(mark.data))
+							
+							if not mark.emitter or (t1 - t) % 5 < 1 then
+								Board[mark.fn](Board, unpack(mark.data))
+							end
 						end
 					end
 					
