@@ -135,6 +135,11 @@ Chess_Bishop_Charge = Chess_Castle_Charge:new {
 }
 Chess_Bishop_Charge.TipImage = Chess_Bishop_Charge.TipImages.Mountain
 
+-- Only show the bishop charge when the achievements are completed
+function Chess_Bishop_Charge:GetUnlocked()
+  return achvTrigger:hasSecret()
+end
+
 -- vanilla does not support diagonal direciton, plus phase makes things a bit more difficult
 function Chess_Bishop_Charge:GetTargetZone(p1, p2)
   local ret = PointList()

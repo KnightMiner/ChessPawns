@@ -4,7 +4,7 @@ local mod = {
   version = "1.3.0",
   requirements = {},
   icon = "img/icon.png",
-  modApiVersion = "2.5.1",
+  modApiVersion = "2.5.3",
   config = {
     rookRockThrow = true,
     knightCapMax = false
@@ -194,31 +194,10 @@ function mod:init()
   diagonal.setupAnimations("Chess_Bishop", "units/player/chess_bishop_diagonal")
 
   -- shop
-  self.shop = self:loadScript("libs/shop")
-  self.shop:addWeapon({
-    id = "Chess_Knight_Smite",
-    name = texts.Chess_Knight_Smite_Name,
-    desc = "Adds Knight Smite to the store."
-  })
-  self.shop:addWeapon({
-    id = "Chess_Castle_Charge",
-    name = texts.Chess_Castle_Charge_Name,
-    desc = "Adds Castle Charge to the store."
-  })
-  self.shop:addWeapon({
-    id = "Chess_Spawn_Pawn",
-    name = texts.Chess_Spawn_Pawn_Name,
-    desc = "Adds Spawn Pawn to the store."
-  })
-  -- add bishop charge only if the bishop is unlocked
-  local achvTrigger = self:loadScript("achievementTriggers")
-  if achvTrigger:hasSecret() then
-    self.shop:addWeapon({
-      id = "Chess_Bishop_Charge",
-      name = texts.Chess_Bishop_Charge_Name,
-      desc = "Adds Bishop Charge to the store."
-    })
-  end
+  modApi:addWeaponDrop("Chess_Knight_Smite")
+  modApi:addWeaponDrop("Chess_Castle_Charge")
+  modApi:addWeaponDrop("Chess_Spawn_Pawn")
+  modApi:addWeaponDrop("Chess_Bishop_Charge")
 
   -- weapon texts
   for _, weapon in ipairs({
@@ -232,7 +211,6 @@ end
 function mod:load(options,version)
   -- load libraries
   self.modApiExt:load(self, options, version)
-  self.shop:load(options)
   self:loadScript("libs/trait"):load()
   self:loadScript("weaponPreview/api"):load()
 
