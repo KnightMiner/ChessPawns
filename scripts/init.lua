@@ -25,9 +25,10 @@ end
 
   @param name  Weapon name to fix
 ]]
-function fixWeaponTexts(name)
+local function fixWeaponTexts(name)
   -- get name and description
   local base = _G[name]
+  if not base then return end
   base.Name = Weapon_Texts[name .. "_Name"]
   base.Description = Weapon_Texts[name .. "_Description"]
   -- upgrade A description
@@ -228,7 +229,10 @@ function mod:load(options,version)
   self.config.knightCapMax = options.knightCapMax and options.knightCapMax.enabled
   local image = self.config.rookRockThrow and "Mountain" or "Normal"
   for _, weapon in pairs({"Chess_Castle_Charge", "Chess_Castle_Charge_A", "Chess_Bishop_Charge"}) do
-    _G[weapon].TipImage = _G[weapon].TipImages[image]
+    local weaponObj = _G[weapon]
+    if weaponObj and weaponObj.TipImages then
+      weaponObj.TipImage = weaponObj.TipImages[image]
+    end
   end
 
 	-- reset tutorial tooltips if checked
