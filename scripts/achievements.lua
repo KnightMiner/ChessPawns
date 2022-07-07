@@ -26,7 +26,7 @@ modApi.achievements:add{
 --[[
 local difficulties = {"hard", "normal", "easy"}
 
---[[--
+--[--
   Selects an image based on the achievement status for victory images
 
   @param chievo  Achievement instance

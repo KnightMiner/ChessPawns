@@ -196,12 +196,9 @@ modApi:addModsInitializedHook(function()
   function getStartingSquad(choice, ...)
     -- get vanilla results
     local result = oldGetStartingSquad(choice, ...)
-    if not achvTrigger:hasSecret() then
-      return result
-    end
 
     -- if the squad is chess pawns, insert bishop mech in
-    if result[1] == "Chess Pawns" then
+    if result[1] == "Chess Pawns" and achvTrigger:hasSecret() then
       local copy = {}
       for i, v in pairs(result) do
         copy[#copy+1] = v

@@ -33,8 +33,7 @@ end
   @param diff     Difficulty name
 ]]
 local function achieveDifficulty(islands, diff)
-  -- TODO
-  --[[
+  --[[ TODO
   local name = islands .. "_clear"
   if not modApi.achievements:isProgress(mod.id, name, {[diff] = true}) then
     modApi.toasts:add({
@@ -51,7 +50,7 @@ end
   Initializes the achievement triggers
 ]]
 function this:init()
-  --[[
+  --[[ TODO
   local oldMissionEnd = Mission_Final_Cave.MissionEnd
 
   function Mission_Final_Cave:MissionEnd()
