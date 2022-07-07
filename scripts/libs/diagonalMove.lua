@@ -126,7 +126,7 @@ function diagonal.addStep(ret, point)
   --local item = nil
   if Board:IsItem(point) then
     -- temporarily disabled as I lack a way to remove an item
-    -- item = saveData.getSpaceKey("item")
+    -- item = saveData.getSpaceKey(point, "item")
     -- remove item
     ret:AddScript("Pawn:SetSpace(Point(-1,-1))")
 
