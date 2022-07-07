@@ -1,9 +1,8 @@
 local mod = mod_loader.mods[modApi.currentMod]
 local helpers = mod:loadScript("libs/helpers")
-local palettes = mod:loadScript("libs/customPalettes")
 
 ----Mechs----
-local pawnColor = palettes.getOffset("ChessWhite")
+local pawnColor = modApi:getPaletteImageOffset("ChessWhite")
 
 --[[--
   Knight Mech: Prime focused on leap attacks

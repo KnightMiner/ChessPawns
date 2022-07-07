@@ -1,7 +1,6 @@
 local mod = mod_loader.mods[modApi.currentMod]
 local diagonal = mod:loadScript("libs/diagonalMove")
 local helpers = mod:loadScript("libs/helpers")
-local palettes = mod:loadScript("libs/customPalettes")
 local previewer = mod:loadScript("weaponPreview/api")
 local saveData = mod:loadScript("libs/saveData")
 local tips = mod:loadScript("libs/tutorialTips")
@@ -170,7 +169,7 @@ local CHESS_PAWNS = {
   @return Mech color, or DEFAULT_COLOR if missing
 ]]
 local function getColor(pawnId)
-  return saveData.safeGet(GameData, "current", "colors", pawnId+1) or palettes.getOffset("ChessWhite")
+  return saveData.safeGet(GameData, "current", "colors", pawnId+1) or modApi:getPaletteImageOffset("ChessWhite")
 end
 
 -- Allows targeting water and holes instead of just land
@@ -261,7 +260,7 @@ function Chess_Spawn_Pawn:GetSkillEffect(p1, target)
   if GAME and not helpers.isTooltip() then
     _G[pawnType].ImageOffset = getColor(mechId)
   else
-    _G[pawnType].ImageOffset = palettes.getOffset("ChessWhite")
+    _G[pawnType].ImageOffset = modApi:getPaletteImageOffset("ChessWhite")
   end
 
   damage.sPawn = pawnType

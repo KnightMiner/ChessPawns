@@ -128,18 +128,20 @@ function mod:init()
   )
 
   -- add palette
-  local palettes = self:loadScript("libs/customPalettes")
-  palettes.addPalette({
-    ID = "ChessWhite",
-    Name = "Chess White",
-    PlateHighlight = {170, 245, 255},
-    PlateLight     = {255, 255, 255},
-    PlateMid       = {192, 208, 216},
-    PlateDark      = {110, 133, 141},
-    PlateOutline   = { 36,  37,  49},
-    PlateShadow    = { 43,  50,  56},
-    BodyColor      = { 89,  96, 103},
-    BodyHighlight  = {175, 175, 175},
+  modApi:addPalette({
+    id   = "ChessWhite",
+    name = "Chess White",
+    image = "img/units/player/chess_knight_ns.png",
+    colorMap = {
+      PlateHighlight = {170, 245, 255},
+      PlateLight     = {255, 255, 255},
+      PlateMid       = {192, 208, 216},
+      PlateDark      = {110, 133, 141},
+      PlateOutline   = { 36,  37,  49},
+      PlateShadow    = { 43,  50,  56},
+      BodyColor      = { 89,  96, 103},
+      BodyHighlight  = {175, 175, 175},
+    }
   })
 
   -- weapons
