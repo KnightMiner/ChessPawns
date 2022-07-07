@@ -1,5 +1,4 @@
 local mod = mod_loader.mods[modApi.currentMod]
-local achvApi = mod:loadScript("achievements/api")
 local helpers = mod:loadScript("libs/helpers")
 
 local this = {}
@@ -24,7 +23,7 @@ end
   Public function to check if the squad is selected an an achievement has not been unlocked
 ]]
 function this:available(id)
-  return not helpers.isTooltip() and not IsTestMechScenario() and checkSquad() and not achvApi:GetChievoStatus(id)
+  return not helpers.isTooltip() and not IsTestMechScenario() and checkSquad() and not modApi.achievements:isComplete(mod.id, id)
 end
 
 --[[--
@@ -34,21 +33,25 @@ end
   @param diff     Difficulty name
 ]]
 local function achieveDifficulty(islands, diff)
+  -- TODO
+  --[[
   local name = islands .. "_clear"
-  if not achvApi:GetChievoProgress(name)[diff] then
-    achvApi:ToastUnlock({
+  if not modApi.achievements:isProgress(mod.id, name, {[diff] = true}) then
+    modApi.toasts:add({
       name = string.format("%s %d Island %s Victory", squadname, islands, (diff:gsub("^%l", string.upper))),
       tip = string.format('Complete %d corporate islands in %s then win the game.', islands, diff),
       img = string.format('img/achievements/chess_%d_clear_%s.png', islands, diff),
     })
-    achvApi:TriggerChievo(name, {[diff] = true})
+    modApi.achievements:trigger(mod.id, name, {[diff] = true})
   end
+  ]]
 end
 
 --[[--
   Initializes the achievement triggers
 ]]
 function this:init()
+  --[[
   local oldMissionEnd = Mission_Final_Cave.MissionEnd
 
   function Mission_Final_Cave:MissionEnd()
@@ -75,10 +78,11 @@ function this:init()
       -- highscore achievement
       local highscore = GameData.current.score
       if highscore == 30000 then
-        achvApi:TriggerChievo(prefix .. "perfect")
+        --TODO modApi.achievements:trigger(mod.id, prefix .. "perfect")
       end
     end
   end
+  ]]
 end
 
 --[[--
@@ -88,7 +92,7 @@ end
 ]]
 function this:hasSecret()
   for _, id in ipairs(bonusAchievements) do
-    if not achvApi:GetChievoStatus(id) then
+    if not modApi.achievements:isComplete(mod.id, id) then
       return false
     end
   end
@@ -108,14 +112,14 @@ function this:trigger(id)
   end
 
   -- ensure its not already unlocked
-  if achvApi:GetChievoStatus(id) then  return end
+  if modApi.achievements:isComplete(mod.id, id) then return end
 
   -- trigger it
-  achvApi:TriggerChievo(id)
+  modApi.achievements:trigger(mod.id, id)
 
   -- show bonus message when relevant
   if this:hasSecret() then
-    achvApi:ToastUnlock(unlock)
+    modApi.toasts:add(unlock)
   end
 end
 

@@ -64,7 +64,6 @@ end
 function mod:init()
   -- script init
   self:loadScript("weaponPreview/api")
-  self:loadScript("achievements/init")
   if modApiExt then
     self.modApiExt = modApiExt
   else
@@ -216,7 +215,7 @@ function mod:load(options,version)
 
   -- add mech squad
   modApi:addSquad(
-    { "Chess Pawns", "Chess_Knight", "Chess_Rook", "Chess_King" },
+    { "Chess Pawns", "Chess_Knight", "Chess_Rook", "Chess_King", id = "knight_ChessPawns" },
     "Chess Pawns",
     "These mech employ unusual weapons and unique movement patterns.",
     self.resourcePath.."img/icon.png"

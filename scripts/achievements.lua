@@ -1,28 +1,29 @@
-local mod = mod_loader.mods[modApi.currentMod]
-local achvApi = mod:loadScript("achievements/api")
-
 -- special
-achvApi:AddChievo{
+modApi.achievements:add{
   id = "woodpusher",
   name = "Woodpusher",
   tip = "Use pawn, rook, and knight weapons to push other mechs 3 times in one mission.",
   img = "img/achievements/chess_woodpusher.png",
+  squad = "knight_ChessPawns"
 }
 
-achvApi:AddChievo{
+modApi.achievements:add{
   id = "pawn_grenade",
   name = "Pawn Grenade",
   tip = "Kill at least two enemies by tossing an exploding pawn at them with the castle charge.",
   img = "img/achievements/chess_pawn_grenade.png",
+  squad = "knight_ChessPawns"
 }
 
-achvApi:AddChievo{
+modApi.achievements:add{
   id = "one_shot",
   name = "One Shot",
   tip = "Kill a boss in a single hit using knight smite.",
   img = "img/achievements/chess_one_shot.png",
+  squad = "knight_ChessPawns"
 }
 
+--[[
 local difficulties = {"hard", "normal", "easy"}
 
 --[[--
@@ -30,7 +31,7 @@ local difficulties = {"hard", "normal", "easy"}
 
   @param chievo  Achievement instance
   @return  Achievement image path
-]]
+]
 local function getVictoryImg(chievo)
   -- if achieved, use full image with all medals
   if achvApi:IsChievoCompleted(chievo.id) then
@@ -96,3 +97,4 @@ achvApi:AddChievo{
   tip = "Win the game and obtain the highest possible score.",
   img = "img/achievements/chess_perfect.png"
 }
+]]
