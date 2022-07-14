@@ -168,9 +168,10 @@ function Chess_Knight_Move:GetTargetAreaExt(p1, move)
   end
 
   -- add a terrain description for max damage
+  -- max damage will use knight's max health if shielded
   local maxDamage = 0
   if self.IsAttack then
-    maxDamage = getHealthEquivelent(Pawn, config.knightCapMax) + self.LessSelfDamage
+    maxDamage = getHealthEquivelent(Pawn, config.knightCapMax or Pawn:IsShield()) + self.LessSelfDamage
     previewer:AddDesc(p1, "knight_max_" .. maxDamage)
   end
 
