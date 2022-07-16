@@ -22,7 +22,7 @@ Chess_Knight = Pawn:new {
   Armor = true,
   -- skills
   SkillList = { "Chess_Knight_Smite" },
-  MoveSkill = Chess_Knight_Move,
+  MoveSkill = "Chess_Knight_Move",
   -- display
   Image = "chess_knight",
   ImageOffset = pawnColor,
@@ -48,7 +48,7 @@ Chess_Rook = Pawn:new {
   MoveSpeed = 7,
   -- skills
   SkillList = { "Chess_Castle_Charge" },
-  MoveSkill = Chess_Rook_Move,
+  MoveSkill = "Chess_Rook_Move",
   -- display
   Image = "chess_rook",
   ImageOffset = pawnColor,
@@ -75,7 +75,7 @@ Chess_King = Pawn:new {
   Flying = true,
   -- skills
   SkillList = { "Chess_Spawn_Pawn" },
-  MoveSkill = Chess_King_Move,
+  MoveSkill = "Chess_King_Move",
   -- display
   Image = "chess_king",
   ImageOffset = pawnColor,
@@ -102,7 +102,7 @@ Chess_Bishop = Pawn:new {
   MoveSpeed = 7,
   -- skills
   SkillList = { "Chess_Bishop_Charge" },
-  MoveSkill = Chess_Bishop_Move,
+  MoveSkill = "Chess_Bishop_Move",
   -- display
   Image = "chess_bishop",
   ImageOffset = pawnColor,
@@ -126,7 +126,7 @@ Chess_Pawn = Pawn:new {
   MoveSpeed = 2,
   -- skills
   SkillList = { "Chess_Pawn_Spear" },
-  MoveSkill = Chess_Pawn_Move,
+  MoveSkill = "Chess_Pawn_Move",
   -- display
   Image = "chess_pawn",
   ImageOffset = pawnColor,
