@@ -34,6 +34,13 @@ function Chess_Pawn_Move:GetTargetArea(p1)
   return helpers.getTargetLine(p1, Pawn:GetMoveSpeed(), 0)
 end
 
+function Chess_Pawn_Move:GetSkillEffect(p1, p2)
+	local ret = SkillEffect()
+	ret:AddMove(Board:GetPath(p1, p2, Pawn:GetPathProf()), FULL_DELAY)
+
+	return ret
+end
+
 --[[--
   Pawn Spear: 1 push damage in any orthogonal, or 1 space stealing damage in any diagonal
 ]]
