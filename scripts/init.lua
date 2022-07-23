@@ -1,10 +1,10 @@
 local mod = {
   id = "Knight_Chess",
   name = "Chess Pawns",
-  version = "1.3.0",
+  version = "1.4.0",
   requirements = {},
   icon = "img/icon.png",
-  modApiVersion = "2.5.3",
+  modApiVersion = "2.6.4",
   config = {
     rookRockThrow = true,
     knightCapMax = false
