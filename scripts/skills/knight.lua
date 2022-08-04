@@ -63,6 +63,7 @@ local function getHealthEquivelent(pawn, useMax)
   if not useMax and pawn:IsAcid() then
     health = math.ceil(health / 2)
   -- note this returns true even if acid
+  -- TODO: this is pretty unreliable when it comes to psions, is there a way to detect armor reliably that does not depend on save data?
   elseif pawn:IsArmor() then
     health = health + 1
   end
@@ -172,6 +173,9 @@ function Chess_Knight_Move:GetTargetAreaExt(p1, move)
   local maxDamage = 0
   if self.IsAttack then
     maxDamage = getHealthEquivelent(Pawn, config.knightCapMax or Pawn:IsShield()) + self.LessSelfDamage
+    if Pawn:IsBoosted() then
+      maxDamage = maxDamage + 1
+    end
     previewer:AddDesc(p1, "knight_max_" .. maxDamage)
   end
 
@@ -372,6 +376,9 @@ function Chess_Knight_Smite:GetSkillEffect(p1, p2)
   if target ~= nil and target:GetSpace() ~= Pawn:GetSpace() then
     -- deal damage based on targets health
     local selfDamage = getHealthEquivelent(target) - self.LessSelfDamage
+    if Pawn:IsBoosted() then
+      selfDamage = selfDamage - 1
+    end
 
     -- move mech
     helpers.addLeap(ret, p1, p2)
