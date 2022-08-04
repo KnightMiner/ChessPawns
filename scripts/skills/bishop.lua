@@ -108,6 +108,7 @@ Chess_Bishop_Charge = Chess_Castle_Charge:new {
   UpgradeCost = {2, 2},
   -- settings
   Damage = 2,
+  Orthogonal = false,
   Diagonal = true,
   -- effects
   Icon = "weapons/chess_bishop_charge.png",

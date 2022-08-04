@@ -147,12 +147,13 @@ Chess_Castle_Charge = Skill:new {
   PowerCost = 1,
   Upgrades = 2,
   UpgradeCost = {1, 3},
-	ZoneTargeting = ZONE_DIR,
   -- settings
   Damage = 1,
   Push = false,
   Phase = false,
+  Orthogonal = true,
   Diagonal = false,
+  ZoneTargeting = ZONE_CUSTOM,
   -- effects
   Icon = "weapons/chess_castle_charge.png",
   LaunchSound = "/weapons/charge",
@@ -178,7 +179,7 @@ Chess_Castle_Charge = Skill:new {
 }
 Chess_Castle_Charge.TipImage = Chess_Castle_Charge.TipImages.Mountain
 
--- Upgrade 1: Toss upgrade
+--[[ Upgrade 1: Toss upgrade
 Chess_Castle_Charge_A = Chess_Castle_Charge:new {
   Push = true,
   TipImages = {
@@ -202,6 +203,30 @@ Chess_Castle_Charge_A = Chess_Castle_Charge:new {
   }
 }
 Chess_Castle_Charge_A.TipImage = Chess_Castle_Charge_A.TipImages.Mountain
+]]
+
+-- Upgrade 1: Queen charge
+Chess_Castle_Charge_A = Chess_Castle_Charge:new {
+  Diagonal = true,
+  TipImages = {
+    -- tip image with mountain config option
+    Mountain = {
+      Unit          = Point(3,2),
+      Enemy         = Point(3,3),
+      Target        = Point(3,3),
+      Second_Origin = Point(3,2),
+      Mountain      = Point(1,0),
+  		Second_Target = Point(1,0)
+    },
+    -- tip image with no mountain enabled
+    Normal = {
+      Unit   = Point(3,2),
+      Enemy  = Point(1,0),
+      Target = Point(1,0)
+    }
+  }
+}
+Chess_Castle_Charge_A.TipImage = Chess_Castle_Charge_A.TipImages.Mountain
 
 -- Upgrade 2: Damage upgrade
 Chess_Castle_Charge_B = Chess_Castle_Charge:new {
@@ -210,9 +235,43 @@ Chess_Castle_Charge_B = Chess_Castle_Charge:new {
 
 -- Both upgrades
 Chess_Castle_Charge_AB = Chess_Castle_Charge_A:new {
-  Push = true,
   Damage = 3
 }
+
+-- adds a line to the target area
+local function addLine(self, ret, start, offset)
+  -- offset the point in each direction
+  local point = start + offset
+  if Board:IsValid(point) then
+    for i = 1, 7 do
+      point = start + offset * i
+      -- need an open spot to move the mech
+      local canTarget = not Board:IsBlocked(point - offset * (i == 1 and 2 or 1), PATH_FLYER)
+
+      -- if a pawn, add and stop
+      if Board:IsPawnSpace(point) then
+        if canTarget and not Board:GetPawn(point):IsGuarding() then
+          ret:push_back(point)
+        end
+        -- can phase through pawns
+        if not self.Phase then break end
+      -- can target mountains to throw a rock
+      elseif config.rookRockThrow and Board:GetTerrain(point) == TERRAIN_MOUNTAIN then
+        if canTarget then
+          ret:push_back(point)
+        end
+        -- cannot phase through mountains
+        break
+      -- if empty, add and try next space
+      elseif not Board:IsBlocked(point, PATH_PROJECTILE) then
+        ret:push_back(point)
+      -- blocked means we are done, unless phasing
+      elseif not self.Phase then
+        break
+      end
+    end
+  end
+end
 
 --- Can charge in any direction, can target mobile enemies if there is a space to put them
 function Chess_Castle_Charge:GetTargetArea(start)
@@ -220,46 +279,34 @@ function Chess_Castle_Charge:GetTargetArea(start)
 
   -- in each direction, draw a full path
   for dir = DIR_START, DIR_END do
-    local offset = DIR_VECTORS[dir]
-    -- bishop charges diagonal instead
-    if self.Diagonal then
-      offset = offset + DIR_VECTORS[(dir+1)%4]
+    -- allow choosing one or both directions of charge
+    local orthoOffset = DIR_VECTORS[dir]
+    local diagOffset = orthoOffset + DIR_VECTORS[(dir+1)%4]
+    if self.Orthogonal then
+      addLine(self, ret, start, orthoOffset)
     end
-
-    -- offset the point in each direction
-    local point = start + offset
-    if Board:IsValid(point) then
-      for i = 1, 7 do
-        point = start + offset * i
-        -- need an open spot to move the mech
-        local canTarget = not Board:IsBlocked(point - offset * (i == 1 and 2 or 1), PATH_FLYER)
-
-        -- if a pawn, add and stop
-        if Board:IsPawnSpace(point) then
-          if canTarget and not Board:GetPawn(point):IsGuarding() then
-            ret:push_back(point)
-          end
-          -- can phase through pawns
-          if not self.Phase then break end
-        -- can target mountains to throw a rock
-        elseif config.rookRockThrow and Board:GetTerrain(point) == TERRAIN_MOUNTAIN then
-          if canTarget then
-            ret:push_back(point)
-          end
-          -- cannot phase through mountains
-          break
-        -- if empty, add and try next space
-        elseif not Board:IsBlocked(point, PATH_PROJECTILE) then
-          ret:push_back(point)
-        -- blocked means we are done, unless phasing
-        elseif not self.Phase then
-          break
-        end
-      end
+    if self.Diagonal then
+      addLine(self, ret, start, diagOffset)
     end
   end
 
   return ret
+end
+
+function Chess_Castle_Charge:GetTargetZone(origin, target)
+	local targets = self:GetTargetArea(origin)
+	local ret = PointList()
+
+	local dir = diagonal.minimize(target-origin)
+  LOG(dir)
+	for i = 1, targets:size() do
+    LOG(diagonal.minimize(targets:index(i) - origin))
+		if diagonal.minimize(targets:index(i) - origin) == dir then
+			ret:push_back(targets:index(i))
+		end
+	end
+
+	return ret
 end
 
 --[[--

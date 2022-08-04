@@ -9,8 +9,8 @@ return {
 
   Chess_Castle_Charge_Name = "Castle Charge",
   Chess_Castle_Charge_Description = "Fly in a line and slam into a target, tossing it where you started.",
-  Chess_Castle_Charge_Upgrade1 = "Push",
-  Chess_Castle_Charge_A_UpgradeDescription = "Pushes units to the sides of where the target lands.",
+  Chess_Castle_Charge_Upgrade1 = "Diagonal",
+  Chess_Castle_Charge_A_UpgradeDescription = "Allows charging diagonally.",
   Chess_Castle_Charge_Upgrade2 = "+2 Damage",
   Chess_Castle_Charge_B_UpgradeDescription = "Increases damage to by 2.",
 

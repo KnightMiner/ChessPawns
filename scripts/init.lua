@@ -193,6 +193,7 @@ function mod:init()
   -- diagonal pawn animations
   local diagonal = self:loadScript("libs/diagonalMove")
   diagonal.setupAnimations("Chess_King", "units/player/chess_king_diagonal")
+  diagonal.setupAnimations("Chess_Rook", "units/player/chess_rook_diagonal")
   diagonal.setupAnimations("Chess_Bishop", "units/player/chess_bishop_diagonal")
 
   -- shop
