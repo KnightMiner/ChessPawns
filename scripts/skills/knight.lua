@@ -289,7 +289,7 @@ Chess_Knight_Smite = Chess_Knight_Move:new {
   -- base stats
   Class = "Prime",
   Damage = DAMAGE_DEATH,
-  PowerCost = 2,
+  PowerCost = 1,
   Upgrades = 2,
   UpgradeCost = {1, 2},
   -- settings

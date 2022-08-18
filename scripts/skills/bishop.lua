@@ -103,7 +103,7 @@ Chess_Bishop_Move.GetSkillEffect = Chess_Bishop_Move.GetSkillEffectExt
 ]]
 Chess_Bishop_Charge = Chess_Castle_Charge:new {
   -- base stats
-  PowerCost = 1,
+  PowerCost = 0,
   Upgrades = 2,
   UpgradeCost = {2, 2},
   -- settings

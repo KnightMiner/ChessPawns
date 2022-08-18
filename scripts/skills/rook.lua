@@ -144,7 +144,7 @@ Chess_Rook_Move.GetSkillEffect = Chess_Rook_Move.GetSkillEffectExt
 Chess_Castle_Charge = Skill:new {
   -- base stats
   Class = "Brute",
-  PowerCost = 1,
+  PowerCost = 0,
   Upgrades = 2,
   UpgradeCost = {1, 3},
   -- settings
