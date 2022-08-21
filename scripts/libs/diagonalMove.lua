@@ -244,6 +244,9 @@ function diagonal.addMove(ret, p1, p2)
 
   -- add a normal move so it shows up in the tooltip
   ret:AddTeleport(p1, p2, NO_DELAY)
+  -- don't show the teleport icon, its not a teleport
+  ret.effect:index(ret.effect:size() - 1).sImageMark = ""
+  ret.effect:back().sImageMark = ""
 end
 
 --[[--
