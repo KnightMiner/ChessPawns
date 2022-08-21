@@ -8,7 +8,7 @@ local tips = mod:loadScript("libs/tutorialTips")
 local trait = mod:loadScript("libs/trait")
 
 -- Move tooltip --
-local HELP_TEXT = "The rook can move up to 7 spaces in a single direction. If the rook's speed is greater than 7, he can use the extra in a second direction."
+local HELP_TEXT = "The rook can move up to 7 spaces in a single direction. If the rook's speed is greater than 7, you can use the extra move diagonally."
 trait:Add{
   PawnTypes = "Chess_Rook",
   Icon = "img/combat/icons/icon_rook_move.png",
@@ -21,17 +21,24 @@ tips:Add{
 	title = "Rook Movement",
 	text = HELP_TEXT
 }
+HELP_TEXT = "The rook can move up to 7 spaces in a single direction. If the rook's speed is greater than 7, you can use the extra in a second direction."
+tips:Add{
+	id = "Rook_Move_Corner",
+	title = "Rook Movement",
+	text = HELP_TEXT
+}
 
 --[[--
-  Rook Move: any number of spaces in a straight line
+  Corner Rook Move: any number of spaces in a straight line
 
   Upgrade: Move extra spaces in a second line
+  No longer used by default, in favor of diagonal style
 ]]
-Chess_Rook_Move = {}
-function Chess_Rook_Move:GetTargetAreaExt(p1, move)
+Chess_Rook_Move_Corner = {}
+function Chess_Rook_Move_Corner:GetTargetAreaExt(p1, move)
   -- rook moves up to 7 in one direction, extra allows a second move on another axis
   if not IsTestMechScenario() then
-    tips:Trigger("Rook_Move", p1)
+    tips:Trigger("Rook_Move_Corner", p1)
   end
   local move = move or Pawn:GetMoveSpeed()
   local extra = 0
@@ -41,10 +48,10 @@ function Chess_Rook_Move:GetTargetAreaExt(p1, move)
   end
   return helpers.getTargetLine(p1, move, extra)
 end
-Chess_Rook_Move.GetTargetArea = Chess_Rook_Move.GetTargetAreaExt
+Chess_Rook_Move_Corner.GetTargetArea = Chess_Rook_Move_Corner.GetTargetAreaExt
 
 --- CauldronPilots compatibility: bonus spaces from CricketSkill
-function Chess_Rook_Move:CricketTargetArea(p1)
+function Chess_Rook_Move_Corner:CricketTargetArea(p1)
   -- start with defaukt move
   local ret = self:GetTargetAreaExt(p1)
   local defaultSpaces = extract_table(ret)
@@ -81,7 +88,7 @@ end
   Draws the path for the given rook movement
   All paths should consist of 1 or 2 lines over valid spaces
 ]]
-function Chess_Rook_Move:GetSkillEffectExt(p1, p2, ret)
+function Chess_Rook_Move_Corner:GetSkillEffectExt(p1, p2, ret)
   local ret = ret or SkillEffect()
   local path = Pawn:GetPathProf()
 
@@ -134,7 +141,64 @@ function Chess_Rook_Move:GetSkillEffectExt(p1, p2, ret)
   -- charge remaining distance
   return ret
 end
-Chess_Rook_Move.GetSkillEffect = Chess_Rook_Move.GetSkillEffectExt
+Chess_Rook_Move_Corner.GetSkillEffect = Chess_Rook_Move_Corner.GetSkillEffectExt
+
+
+--[[--
+  Rook Move: any number of spaces in a straight line
+
+  Upgrade: Move extra spaces diagonally
+]]
+Chess_Rook_Move = Skill:new{}
+
+--[[--
+  This function is a safer version of GetTargetArea as the weaponPreview lib injects code into all GetTargetArea functions
+  Designed to be called externally by mods with custom movement skills
+
+  @param p1    Pawn location
+  @param move  Pawn move speed, defaults to Pawn:GetMoveSpeed()
+  @return  Target area for this function
+]]
+function Chess_Rook_Move:GetTargetAreaExt(p1, move)
+  if not IsTestMechScenario() then
+    tips:Trigger("Rook_Move", p1)
+  end
+  local move = move or Pawn:GetMoveSpeed()
+  local diagonal = 0
+  if move > 7 then
+    diagonal = move - 7
+    move = 7
+  end
+  return helpers.getDiagonalMoves(p1, diagonal, move)
+end
+Chess_Rook_Move.GetTargetArea = Chess_Rook_Move.GetTargetAreaExt
+
+--[[--
+  This function is a safer version of GetSkillEffect as the weaponPreview lib injects code into all GetTargetArea functions
+  It also allows a clean way to build on an existing skill effect
+
+  @param p1   Pawn location
+  @param p2   Target location
+  @param ret  Existing SkillEffect instance
+  @return  Effect for this move
+]]
+function Chess_Rook_Move:GetSkillEffectExt(p1, p2, ret)
+  local ret = ret or SkillEffect()
+
+  -- in diagonal line? use diagonal move util
+  local offset = p2 - p1
+  if math.abs(offset.x) == math.abs(offset.y) then
+    diagonal.addMove(ret, p1, p2)
+  else
+    ret:AddMove(Board:GetPath(p1, p2, Pawn:GetPathProf()), FULL_DELAY)
+  end
+
+  return ret
+end
+
+function Chess_Rook_Move:GetSkillEffect(p1, p2)
+  return self:GetSkillEffectExt(p1, p2)
+end
 
 --[[--
   Castle Charge: charge forwards and flip enemy overself

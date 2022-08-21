@@ -24,9 +24,9 @@ tips:Add{
 --[[--
   Bishop Move: any number of spaces in a diagonal line
 
-  Upgrade: Move extra spaces in a second line
+  Upgrade: Move extra spaces orthogonally
 ]]
-Chess_Bishop_Move = {}
+Chess_Bishop_Move = Chess_Rook_Move:new{}
 --[[--
   This function is a safer version of GetTargetArea as the weaponPreview lib injects code into all GetTargetArea functions
   Designed to be called externally by mods with custom movement skills
@@ -71,30 +71,6 @@ function Chess_Bishop_Move:CricketTargetArea(p1)
 
   return ret
 end
-
---[[--
-  This function is a safer version of GetSkillEffect as the weaponPreview lib injects code into all GetTargetArea functions
-  It also allows a clean way to build on an existing skill effect
-
-  @param p1   Pawn location
-  @param p2   Target location
-  @param ret  Existing SkillEffect instance
-  @return  Effect for this move
-]]
-function Chess_Bishop_Move:GetSkillEffectExt(p1, p2, ret)
-  local ret = ret or SkillEffect()
-
-  -- in diagonal line? use diagonal move util
-  local offset = p2 - p1
-  if math.abs(offset.x) == math.abs(offset.y) then
-    diagonal.addMove(ret, p1, p2)
-  else
-    ret:AddMove(Board:GetPath(p1, p2, Pawn:GetPathProf()), FULL_DELAY)
-  end
-
-  return ret
-end
-Chess_Bishop_Move.GetSkillEffect = Chess_Bishop_Move.GetSkillEffectExt
 
 --[[--
   Bishop Charge: charge diagonal and flip enemy overself

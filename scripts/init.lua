@@ -55,6 +55,12 @@ function mod:metadata()
     { enabled = false }
   )
   modApi:addGenerationOption(
+    "oldRookMovement",
+    "Old Rook Movement Upgrade",
+    "If checked, rook mech will use the old movement upgrades which allow it to take corners. If unchecked, uses the new diagonal move upgrades",
+    { enabled = false }
+  )
+  modApi:addGenerationOption(
     "resetTutorialTips",
     "Reset Tutorial Tooltips",
     "Check to reset all tutorial tooltips for this profile",
@@ -235,6 +241,9 @@ function mod:load(options,version)
       weaponObj.TipImage = weaponObj.TipImages[image]
     end
   end
+
+  local oldRookMovement = options.oldRookMovement and options.oldRookMovement.enabled
+  Chess_Rook.MoveSkill = oldRookMovement and "Chess_Rook_Move_Corner" or "Chess_Rook_Move"
 
 	-- reset tutorial tooltips if checked
 	if options.resetTutorialTips and options.resetTutorialTips.enabled then
