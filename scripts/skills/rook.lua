@@ -427,6 +427,8 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
   if moved then
     if isDiagonal then
       diagonal.addMove(ret, p1, newPos)
+    elseif self.Phase then
+      ret:AddCharge(Board:GetPath(p1, newPos, PATH_FLYER), p1:Manhattan(newPos) * 0.1)
     else
       ret:AddCharge(Board:GetSimplePath(p1, newPos), p1:Manhattan(newPos) * 0.1)
     end

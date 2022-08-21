@@ -79,38 +79,29 @@ end
 ]]
 Chess_Bishop_Charge = Chess_Castle_Charge:new {
   -- base stats
+  Class = "Science",
   PowerCost = 0,
   Upgrades = 2,
-  UpgradeCost = {2, 2},
+  UpgradeCost = {1, 2},
   -- settings
-  Damage = 2,
+  Damage = 0,
+  Push = true,
   Orthogonal = false,
   Diagonal = true,
   -- effects
   Icon = "weapons/chess_bishop_charge.png",
   -- visual
-  TipImages = {
-    -- tip image with mountain config option
-    Mountain = {
-      Unit          = Point(3,3),
-      Enemy         = Point(4,2),
-      Target        = Point(4,2),
-      Second_Origin = Point(3,3),
-      Mountain      = Point(1,1),
-  		Second_Target = Point(1,1)
-    },
-    -- tip image with no mountain enabled
-    Normal = {
-      Unit          = Point(2,2),
-      Enemy         = Point(3,1),
-      Target        = Point(3,1),
-      Second_Origin = Point(3,3),
-      Enemy2        = Point(1,1),
-  		Second_Target = Point(1,1)
-    }
+  TipImage = {
+    Unit          = Point(2,2),
+    Enemy         = Point(3,1),
+    Target        = Point(3,1),
+    Second_Origin = Point(2,2),
+    Enemy2        = Point(0,0),
+    Enemy3        = Point(2,3),
+    Enemy4        = Point(3,2),
+    Second_Target = Point(0,0)
   }
 }
-Chess_Bishop_Charge.TipImage = Chess_Bishop_Charge.TipImages.Mountain
 
 -- Only show the bishop charge when the achievements are completed
 function Chess_Bishop_Charge:GetUnlocked()
@@ -145,26 +136,48 @@ function Chess_Bishop_Charge:GetTargetZone(p1, p2)
   return ret
 end
 
--- Upgrade 1: Phase upgrade
+-- Upgrade 1: Orthogonal upgrade
 Chess_Bishop_Charge_A = Chess_Bishop_Charge:new {
+  Orthogonal = true,
+  TipImage = {
+    Unit          = Point(2,2),
+    Enemy         = Point(3,2),
+    Target        = Point(3,2),
+    Second_Origin = Point(2,2),
+    Enemy2        = Point(0,0),
+    Enemy3        = Point(1,3),
+    Enemy4        = Point(2,3),
+    Second_Target = Point(0,0)
+  }
+}
+
+-- Upgrade 2: Phase upgrade
+Chess_Bishop_Charge_B = Chess_Bishop_Charge:new {
   Phase = true,
   TipImage = {
     Unit     = Point(3,0),
     Building = Point(2,1),
     Enemy    = Point(0,3),
-    Target   = Point(0,3)
+    Target   = Point(0,3),
+    Enemy2   = Point(2,0),
   }
 }
 
--- Upgrade 2: Damage upgrade
-Chess_Bishop_Charge_B = Chess_Bishop_Charge:new {
-  Damage = 3
-}
-
 -- Both upgrades
-Chess_Bishop_Charge_AB = Chess_Bishop_Charge_A:new {
+Chess_Bishop_Charge_AB = Chess_Bishop_Charge:new {
   Phase = true,
-  Damage = 3
+  Orthogonal = true,
+  TipImage = {
+    Unit          = Point(3,1),
+    Building      = Point(2,1),
+    Enemy         = Point(3,0),
+    Enemy2        = Point(0,1),
+    Enemy3        = Point(2,2),
+    Enemy4        = Point(3,2),
+    Target        = Point(2,2),
+    Second_Origin = Point(3,1),
+    Second_Target = Point(0,1)
+  }
 }
 
 -- add bishop to selection screen

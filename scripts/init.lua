@@ -235,7 +235,7 @@ function mod:load(options,version)
   self.config.rookRockThrow = not options.rookRockThrow or options.rookRockThrow.enabled
   self.config.knightCapMax = options.knightCapMax and options.knightCapMax.enabled
   local image = self.config.rookRockThrow and "Mountain" or "Normal"
-  for _, weapon in pairs({"Chess_Castle_Charge", "Chess_Castle_Charge_A", "Chess_Bishop_Charge"}) do
+  for _, weapon in pairs({"Chess_Castle_Charge", "Chess_Castle_Charge_A"}) do
     local weaponObj = _G[weapon]
     if weaponObj and weaponObj.TipImages then
       weaponObj.TipImage = weaponObj.TipImages[image]
