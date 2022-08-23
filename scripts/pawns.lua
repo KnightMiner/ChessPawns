@@ -46,7 +46,7 @@ Chess_Rook = Pawn:new {
   Massive = true,
   -- stats
   Health = 3,
-  MoveSpeed = 7,
+  MoveSpeed = 4,
   -- skills
   SkillList = { "Chess_Castle_Charge" },
   MoveSkill = "Chess_Rook_Move",
@@ -101,7 +101,7 @@ Chess_Bishop = Pawn:new {
   Armor = true,
   -- stats
   Health = 2,
-  MoveSpeed = 7,
+  MoveSpeed = 4,
   -- skills
   SkillList = { "Chess_Bishop_Charge" },
   MoveSkill = "Chess_Bishop_Move",

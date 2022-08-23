@@ -50,30 +50,8 @@ function Chess_King_Move:GetTargetAreaExt(p1, move)
   if not IsTestMechScenario() then
     tips:Trigger("King_Move", p1)
   end
-  local ret = PointList()
-
-  -- first upgrade increases both, after that only 1 is increased
-  local orthogonal, diagonal
   local move = move or Pawn:GetMoveSpeed()
-  if (move <= 2) then
-    orthogonal = move
-    diagonal = move
-  else
-    orthogonal = 1 + math.ceil(move / 2)
-    diagonal = 1 + math.floor(move / 2)
-  end
-
-  -- add moves in all directions
-  for dir = DIR_START, DIR_END do
-    -- verticals and horizontals
-    local offset = DIR_VECTORS[dir]
-    addDirectionMoves(ret, p1, offset, orthogonal)
-    -- diagonals
-    offset = offset + DIR_VECTORS[(dir + 1) % 4]
-    addDirectionMoves(ret, p1, offset, diagonal)
-  end
-
-  return ret
+  return diagonal.getDiagonalMoves(p1, move, move)
 end
 
 --- Move if a line, leap otherwise

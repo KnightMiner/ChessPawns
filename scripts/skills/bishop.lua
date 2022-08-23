@@ -40,12 +40,19 @@ function Chess_Bishop_Move:GetTargetAreaExt(p1, move)
     tips:Trigger("Bishop_Move", p1)
   end
   local move = move or Pawn:GetMoveSpeed()
-  local extra = 0
-  if move > 7 then
-    extra = move - 7
-    move = 7
+  local diagSpeed, orthoSpeed
+  if move > 4 then
+    -- from 5 to 8, get full 7 ortho speed
+    -- +2 diagonal per move above 4 (so max speed at 8)
+    diagSpeed = 7
+    orthoSpeed = 2 * (move - 4)
+  else
+    -- each speed is +2 ortho movement, with the exception of the first which grants 1
+    -- no diagonal speed at all
+    diagSpeed = math.max(2 * move - 1, 0)
+    orthoSpeed = 0
   end
-  return diagonal.getDiagonalMoves(p1, move, extra)
+  return diagonal.getDiagonalMoves(p1, diagSpeed, orthoSpeed)
 end
 Chess_Bishop_Move.GetTargetArea = Chess_Bishop_Move.GetTargetAreaExt
 

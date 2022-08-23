@@ -43,10 +43,17 @@ function Chess_Rook_Move_Corner:GetTargetAreaExt(p1, move)
     tips:Trigger("Rook_Move_Corner", p1)
   end
   local move = move or Pawn:GetMoveSpeed()
-  local extra = 0
-  if move > 7 then
-    extra = move - 7
-    move = 7
+  local offsetSpeed, orthoSpeed
+  if move > 4 then
+    -- from 5 to 8, get full 7 ortho speed
+    -- +2 diagonal per move above 4 (so max speed at 8)
+    orthoSpeed = 7
+    offsetSpeed = move - 4
+  else
+    -- each speed is +2 ortho movement, with the exception of the first which grants 1
+    -- no diagonal speed at all
+    orthoSpeed = math.max(2 * move - 1, 0)
+    offsetSpeed = 0
   end
 
   -- using a hash so we can skip duplicates
@@ -59,7 +66,7 @@ function Chess_Rook_Move_Corner:GetTargetAreaExt(p1, move)
   for dir = DIR_START, DIR_END do
     -- straight line
     local offset = DIR_VECTORS[dir]
-    for x = 1, move do
+    for x = 1, orthoSpeed do
       local linePoint = p1 + offset * x
       if not Board:IsValid(linePoint) then break end
 
@@ -70,8 +77,8 @@ function Chess_Rook_Move_Corner:GetTargetAreaExt(p1, move)
         -- free spaces means we keep this and possibly extend off to either side
         points[p2idx(linePoint)] = linePoint
 
-        -- extra means extend off sides
-        if extra > 0 then
+        -- offsetSpeed means extend off sides
+        if offsetSpeed > 0 then
           for s = 1, 3, 2 do
             local side = DIR_VECTORS[(dir+s)%4]
             for y = 1, extra do
@@ -213,12 +220,19 @@ function Chess_Rook_Move:GetTargetAreaExt(p1, move)
     tips:Trigger("Rook_Move", p1)
   end
   local move = move or Pawn:GetMoveSpeed()
-  local diagSpeed = 0
-  if move > 7 then
-    diagSpeed = move - 7
-    move = 7
+  local diagSpeed, orthoSpeed
+  if move > 4 then
+    -- from 5 to 8, get full 7 ortho speed
+    -- +2 diagonal per move above 4 (so max speed at 8)
+    orthoSpeed = 7
+    diagSpeed = 2 * (move - 4)
+  else
+    -- each speed is +2 ortho movement, with the exception of the first which grants 1
+    -- no diagonal speed at all
+    orthoSpeed = math.max(2 * move - 1, 0)
+    diagSpeed = 0
   end
-  return diagonal.getDiagonalMoves(p1, diagSpeed, move)
+  return diagonal.getDiagonalMoves(p1, diagSpeed, orthoSpeed)
 end
 
 --[[--
