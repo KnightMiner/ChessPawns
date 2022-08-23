@@ -188,6 +188,17 @@ function diagonal.minimize(point)
 end
 
 --[[--
+  Shows that the pawn moved, but does not draw a path in the middle
+]]
+function diagonal.addMoveNoPath(ret, p1, p2)
+  -- add a normal move so it shows up in the tooltip
+  ret:AddTeleport(p1, p2, NO_DELAY)
+  -- don't show the teleport icon, its not a teleport
+  ret.effect:index(ret.effect:size() - 1).sImageMark = ""
+  ret.effect:back().sImageMark = ""
+end
+
+--[[--
   Logic to animation a full diagonal movement path
 
   @param ret  SkillEffect instance
@@ -242,11 +253,7 @@ function diagonal.addMove(ret, p1, p2)
     ret:AddScript(string.format("Pawn:SetAcid(false)", boolString(wasAcid)))
   end
 
-  -- add a normal move so it shows up in the tooltip
-  ret:AddTeleport(p1, p2, NO_DELAY)
-  -- don't show the teleport icon, its not a teleport
-  ret.effect:index(ret.effect:size() - 1).sImageMark = ""
-  ret.effect:back().sImageMark = ""
+  diagonal.addMoveNoPath(ret, p1, p2)
 end
 
 --[[--

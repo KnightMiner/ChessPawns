@@ -129,7 +129,7 @@ function Chess_Pawn_Spear:GetSkillEffect(p1, p2)
       ret:AddDelay(0.1)
       ret:AddScript(string.format("Pawn:SetSpace(%s)", p2:GetString()))
       -- for animation
-      ret:AddTeleport(p1, p2, NO_DELAY)
+      diagonal.addMoveNoPath(ret, p1, p2)
       -- explosion preview if explosiive
       if helpers.pawnExplodes(Pawn:GetType()) and (terrain == TERRAIN_HOLE or terrain == TERRAIN_WATER) then
         for i = DIR_START, DIR_END do
