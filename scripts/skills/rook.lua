@@ -527,8 +527,16 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
       ret:AddBounce(landing, 3)
 
       -- check the achievement, note this assumes no push to work
-      if self.Damage > 0 and achvTrigger:available("pawn_grenade") then
-        ret:AddScript(string.format("Chess_Castle_Charge:CheckAchievement(%s)", landing:GetString()))
+      if self.Damage > 0 then
+        local targetPawn = Board:GetPawn(target)
+        if targetPawn and helpers.pawnExplodes(targetPawn:GetType()) then
+          for i = DIR_START, DIR_END do
+            previewer:AddDamage(SpaceDamage(landing+DIR_VECTORS[i], 2))
+          end
+          if achvTrigger:available("pawn_grenade") then
+            ret:AddScript(string.format("Chess_Castle_Charge:CheckAchievement(%s)", landing:GetString()))
+          end
+        end
       end
       -- increment pushes for other achievement
       achvTrigger:checkPush(ret, target)
