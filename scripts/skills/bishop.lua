@@ -45,7 +45,7 @@ function Chess_Bishop_Move:GetTargetAreaExt(p1, move)
     extra = move - 7
     move = 7
   end
-  return helpers.getDiagonalMoves(p1, move, extra)
+  return diagonal.getDiagonalMoves(p1, move, extra)
 end
 Chess_Bishop_Move.GetTargetArea = Chess_Bishop_Move.GetTargetAreaExt
 

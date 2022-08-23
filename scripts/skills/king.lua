@@ -78,15 +78,7 @@ Chess_King_Move.GetTargetArea = Chess_King_Move.GetTargetAreaExt
 --- Move if a line, leap otherwise
 function Chess_King_Move:GetSkillEffectExt(p1, p2, ret)
   local ret = ret or SkillEffect()
-
-  -- in diagonal line? use diagonal move util
-  local offset = p2 - p1
-  if math.abs(offset.x) == math.abs(offset.y) then
-    diagonal.addMove(ret, p1, p2)
-  else
-    ret:AddMove(Board:GetPath(p1, p2, Pawn:GetPathProf()), FULL_DELAY)
-  end
-
+  diagonal.lineMoveSkillEffect(ret, p1, p2)
   return ret
 end
 Chess_King_Move.GetSkillEffect = Chess_King_Move.GetSkillEffectExt

@@ -46,7 +46,56 @@ function Chess_Rook_Move_Corner:GetTargetAreaExt(p1, move)
     extra = move - 7
     move = 7
   end
-  return helpers.getTargetLine(p1, move, extra)
+
+  -- using a hash so we can skip duplicates
+  local points = {}
+
+  -- for some reason the 16 bit is set for PathProf, not sure what it means
+  local path = Pawn:GetPathProf() % 16
+
+  -- move in all four directions
+  for dir = DIR_START, DIR_END do
+    -- straight line
+    local offset = DIR_VECTORS[dir]
+    for x = 1, move do
+      local linePoint = p1 + offset * x
+      if not Board:IsValid(linePoint) then break end
+
+      -- if blocked, we may still keep going, could be a pawn
+      if Board:IsBlocked(linePoint, path) then
+        if not diagonal.canMovePast(linePoint, path) then break end
+      else
+        -- free spaces means we keep this and possibly extend off to either side
+        points[p2idx(linePoint)] = linePoint
+
+        -- extra means extend off sides
+        if extra > 0 then
+          for s = 1, 3, 2 do
+            local side = DIR_VECTORS[(dir+s)%4]
+            for y = 1, extra do
+              local sidePoint = linePoint + side * y
+              if not Board:IsValid(linePoint) then break end
+
+              -- if blocked, we might be done
+              -- if not blocked, add point and keep going
+              if Board:IsBlocked(linePoint, path) then
+                if not diagonal.canMovePast(linePoint, path) then break end
+              else
+                points[p2idx(sidePoint)] = sidePoint
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+
+  -- convert to a list, note the keys are the points
+  local list = PointList()
+  for _,point in pairs(points) do
+    list:push_back(point)
+  end
+  return list
 end
 Chess_Rook_Move_Corner.GetTargetArea = Chess_Rook_Move_Corner.GetTargetAreaExt
 
@@ -164,12 +213,12 @@ function Chess_Rook_Move:GetTargetAreaExt(p1, move)
     tips:Trigger("Rook_Move", p1)
   end
   local move = move or Pawn:GetMoveSpeed()
-  local diagonal = 0
+  local diagSpeed = 0
   if move > 7 then
-    diagonal = move - 7
+    diagSpeed = move - 7
     move = 7
   end
-  return helpers.getDiagonalMoves(p1, diagonal, move)
+  return diagonal.getDiagonalMoves(p1, diagSpeed, move)
 end
 Chess_Rook_Move.GetTargetArea = Chess_Rook_Move.GetTargetAreaExt
 
@@ -184,15 +233,7 @@ Chess_Rook_Move.GetTargetArea = Chess_Rook_Move.GetTargetAreaExt
 ]]
 function Chess_Rook_Move:GetSkillEffectExt(p1, p2, ret)
   local ret = ret or SkillEffect()
-
-  -- in diagonal line? use diagonal move util
-  local offset = p2 - p1
-  if math.abs(offset.x) == math.abs(offset.y) then
-    diagonal.addMove(ret, p1, p2)
-  else
-    ret:AddMove(Board:GetPath(p1, p2, Pawn:GetPathProf()), FULL_DELAY)
-  end
-
+  diagonal.lineMoveSkillEffect(ret, p1, p2)
   return ret
 end
 

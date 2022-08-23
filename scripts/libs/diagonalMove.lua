@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 -- Diagonal Move Library
--- v1.0
+-- v1.1
 -----------------------------------------------------------------------
 -- This contains helper functions to animate diagonal pawn movement and
 -- handle diagonal targeting and attacks.
@@ -268,6 +268,90 @@ function diagonal.getProjectileEnd(p1, p2, profile)
 	end
 
 	return target
+end
+
+-- checks if the global pawn can move past the given valid but blocked point
+function diagonal.canMovePast(point, path)
+  -- for some reason the 16 bit is set for PathProf, not sure what it means
+  path = path % 16
+
+  -- flying does not care about blockages, keep going
+  if path == PATH_FLYER then
+    return true
+  end
+
+  -- Kawn does not care about pawns
+  if path == PATH_ROADRUNNER then
+    return Board:IsPawnSpace(point)
+  end
+
+  -- for anyone else, they can move through friendlies
+  return Board:IsPawnTeam(point, Pawn:GetTeam())
+end
+
+--[[--
+  Gets all target areas in a straight line
+
+  @param diagSpeed   Maximum spaces to move in the diagonal direction
+  @param orthoSpeed  Maximum spaces to move in the orthogonal direction
+  @param path        Pathing logic to use
+  @return  PointList of available points
+]]
+function diagonal.getDiagonalMoves(start, diagSpeed, orthoSpeed, path)
+  local points = PointList()
+  local path = path or Pawn:GetPathProf()
+
+  -- move in all four directions
+  for dir = DIR_START, DIR_END do
+    -- straight line
+    local offset = DIR_VECTORS[dir]
+    for x = 1, orthoSpeed do
+      local point = start + offset * x
+      if not Board:IsValid(point) then break end
+
+      if Board:IsBlocked(point, path) then
+        -- space is not free, but can we continue the loop?
+        if not diagonal.canMovePast(point, path) then break end
+      else
+        -- if the space is free, we can move to it
+        points:push_back(point)
+      end
+    end
+
+    -- diagonal line
+    offset = offset + DIR_VECTORS[(dir+1)%4]
+    for x = 1, diagSpeed do
+      local point = start + offset * x
+      if not Board:IsValid(point) then break end
+
+      if Board:IsBlocked(point, path) then
+        -- space is not free, but can we continue the loop?
+        if not diagonal.canMovePast(point, path) then break end
+      else
+        -- if the space is free, we can move to it
+        points:push_back(point)
+      end
+    end
+  end
+
+  return points
+end
+
+--[[--
+  Appends a move to the given skill effect, will move diagonally the move is diagonal
+
+  @param ret  Skill effect instance
+  @param p1  move start
+  @param p2  move end
+]]
+function diagonal.lineMoveSkillEffect(ret, p1, p2)
+  -- in diagonal line? use diagonal move util
+  local offset = p2 - p1
+  if math.abs(offset.x) == math.abs(offset.y) then
+    diagonal.addMove(ret, p1, p2)
+  else
+    ret:AddMove(Board:GetPath(p1, p2, Pawn:GetPathProf()), FULL_DELAY)
+  end
 end
 
 return diagonal
