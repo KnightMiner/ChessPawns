@@ -427,9 +427,8 @@ end
   Checks if the current charge attack would trigger the achievement
 
   @param point    Point the pawn lands
-  @param offsetDir  Direction the pawn was thrown. Will be -1 for diagonal, nil if push is disabled
 ]]
-function Chess_Castle_Charge:CheckAchievement(point, offsetDir)
+function Chess_Castle_Charge:CheckAchievement(point)
   local pawn = Board:GetPawn(point)
 
   -- ensure the space has an exploding pawn
@@ -438,11 +437,7 @@ function Chess_Castle_Charge:CheckAchievement(point, offsetDir)
     local kills = 0
     for dir = DIR_START, DIR_END do
       local offset = point + DIR_VECTORS[dir]
-      -- if the offset dir is nil, no push. If its -1, all directions push
-      -- if its a direction 0-3, pushes must be +- 1 away from that
-      local pushDir = offsetDir ~= nil and (offsetDir == -1 or (offsetDir+dir) % 2 == 1) and dir or nil
-      if Board:IsPawnSpace(offset) and Board:IsPawnTeam(offset, TEAM_ENEMY)
-          and helpers.willDamageKill(Board:GetPawn(offset), 2, pushDir) then
+      if Board:IsPawnSpace(offset) and Board:IsPawnTeam(offset, TEAM_ENEMY) and Board:IsDeadly(SpaceDamage(offset, 2), Board:GetPawn(offset)) then
         kills = kills + 1
       end
     end
@@ -531,9 +526,9 @@ function Chess_Castle_Charge:GetSkillEffect(p1, p2)
       ret:AddLeap(toss, FULL_DELAY)
       ret:AddBounce(landing, 3)
 
-      -- check the achievement
-      if achvTrigger:available("pawn_grenade") then
-        ret:AddScript(string.format("Chess_Castle_Charge:CheckAchievement(%s, %s)", landing:GetString(), dir ~= nil and dir or "nil"))
+      -- check the achievement, note this assumes no push to work
+      if self.Damage > 0 and achvTrigger:available("pawn_grenade") then
+        ret:AddScript(string.format("Chess_Castle_Charge:CheckAchievement(%s)", landing:GetString()))
       end
       -- increment pushes for other achievement
       achvTrigger:checkPush(ret, target)

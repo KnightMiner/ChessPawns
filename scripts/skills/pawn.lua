@@ -122,7 +122,7 @@ function Chess_Pawn_Spear:GetSkillEffect(p1, p2)
     else
       -- pawns at 1 health
       local target = Board:GetPawn(p2)
-      willKill = (helpers.willDamageKill(target, 1) and not target:IsMech() and not _G[target:GetType()]:GetCorpse())
+      willKill = (Board:IsDeadly(SpaceDamage(target:GetSpace(), 1), target) and not target:IsMech() and not _G[target:GetType()]:GetCorpse())
     end
     -- if we kill it, take its space
     if willKill then

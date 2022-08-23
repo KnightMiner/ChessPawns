@@ -61,50 +61,6 @@ function helpers.addLeap(effect, start, stop)
   end
 end
 
-
---[[--
-  Checks if the given damage is enough to kill a pawn
-
-  @param point    Pawn location
-  @param amount   Amount of damage to deal
-  @param pushDir  Direction of push before damage, to check if it deals extra damage
-  @return  True if the amount of damage is enough to kill this pawn
-]]
-function helpers.willDamageKill(pawn, amount, pushDir)
-  -- no pawn? already dead
-  if pawn == nil then
-    return true
-  end
-
-  -- ice and shield always takes 2 hits to break
-  if pawn:IsFrozen() or pawn:IsShield() then
-    return false
-  end
-
-  local health = pawn:GetHealth()
-  -- if pushed, check if we will deal push damage or entirely miss
-  if pushDir and pushDir ~= DIR_NONE then
-    if Board:IsBlocked(pawn:GetSpace() + DIR_VECTORS[pushDir], PATH_FLYER) then
-      health = health - 1
-      -- if its dead now, the pawn did not kill it
-      if health == 0 then
-        return false
-      end
-    else
-      return false
-    end
-  end
-  -- ACID and health will affect the killing
-  if pawn:IsAcid() then
-    amount = amount * 2
-  -- note this returns true even if acid
-  elseif pawn:IsArmor() then
-    health = health + 1
-  end
-
-  return health <= amount
-end
-
 --- Map of pawn name to boolean if they explode
 local PAWN_EXPLODES = {
   Chess_Pawn_Explosive     = true,
