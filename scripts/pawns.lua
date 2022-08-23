@@ -20,6 +20,7 @@ Chess_Knight = Pawn:new {
   Health = 3,
   MoveSpeed = 2,
   Armor = true,
+  Jumper = true,
   -- skills
   SkillList = { "Chess_Knight_Smite" },
   MoveSkill = "Chess_Knight_Move",
