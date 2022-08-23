@@ -3,6 +3,7 @@ local config = mod.config
 local achvTrigger = mod:loadScript("achievementTriggers")
 local diagonal = mod:loadScript("libs/diagonalMove")
 local helpers = mod:loadScript("libs/helpers")
+local pawnMove = mod:loadScript("libs/pawnMoveSkill")
 local previewer = mod:loadScript("weaponPreview/api")
 local tips = mod:loadScript("libs/tutorialTips")
 local trait = mod:loadScript("libs/trait")
@@ -34,7 +35,8 @@ tips:Add{
   Upgrade: Move extra spaces in a second line
   No longer used by default, in favor of diagonal style
 ]]
-Chess_Rook_Move_Corner = {}
+Chess_Rook_Move_Corner = pawnMove.ExtendDefaultMove()
+
 function Chess_Rook_Move_Corner:GetTargetAreaExt(p1, move)
   -- rook moves up to 7 in one direction, extra allows a second move on another axis
   if not IsTestMechScenario() then
@@ -97,7 +99,6 @@ function Chess_Rook_Move_Corner:GetTargetAreaExt(p1, move)
   end
   return list
 end
-Chess_Rook_Move_Corner.GetTargetArea = Chess_Rook_Move_Corner.GetTargetAreaExt
 
 --- CauldronPilots compatibility: bonus spaces from CricketSkill
 function Chess_Rook_Move_Corner:CricketTargetArea(p1)
@@ -190,7 +191,6 @@ function Chess_Rook_Move_Corner:GetSkillEffectExt(p1, p2, ret)
   -- charge remaining distance
   return ret
 end
-Chess_Rook_Move_Corner.GetSkillEffect = Chess_Rook_Move_Corner.GetSkillEffectExt
 
 
 --[[--
@@ -198,7 +198,7 @@ Chess_Rook_Move_Corner.GetSkillEffect = Chess_Rook_Move_Corner.GetSkillEffectExt
 
   Upgrade: Move extra spaces diagonally
 ]]
-Chess_Rook_Move = Skill:new{}
+Chess_Rook_Move = pawnMove.ExtendDefaultMove()
 
 --[[--
   This function is a safer version of GetTargetArea as the weaponPreview lib injects code into all GetTargetArea functions
@@ -220,7 +220,6 @@ function Chess_Rook_Move:GetTargetAreaExt(p1, move)
   end
   return diagonal.getDiagonalMoves(p1, diagSpeed, move)
 end
-Chess_Rook_Move.GetTargetArea = Chess_Rook_Move.GetTargetAreaExt
 
 --[[--
   This function is a safer version of GetSkillEffect as the weaponPreview lib injects code into all GetTargetArea functions
@@ -235,10 +234,6 @@ function Chess_Rook_Move:GetSkillEffectExt(p1, p2, ret)
   local ret = ret or SkillEffect()
   diagonal.lineMoveSkillEffect(ret, p1, p2)
   return ret
-end
-
-function Chess_Rook_Move:GetSkillEffect(p1, p2)
-  return self:GetSkillEffectExt(p1, p2)
 end
 
 --[[--

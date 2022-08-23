@@ -1,6 +1,7 @@
 local mod = mod_loader.mods[modApi.currentMod]
 local diagonal = mod:loadScript("libs/diagonalMove")
 local helpers = mod:loadScript("libs/helpers")
+local pawnMove = mod:loadScript("libs/pawnMoveSkill")
 local previewer = mod:loadScript("weaponPreview/api")
 local saveData = mod:loadScript("libs/saveData")
 local tips = mod:loadScript("libs/tutorialTips")
@@ -43,7 +44,8 @@ end
 
   Upgrades: Alternate orthogonal and diagonal
 ]]
-Chess_King_Move = {}
+Chess_King_Move = pawnMove.ExtendDefaultMove()
+
 function Chess_King_Move:GetTargetAreaExt(p1, move)
   if not IsTestMechScenario() then
     tips:Trigger("King_Move", p1)
@@ -73,7 +75,6 @@ function Chess_King_Move:GetTargetAreaExt(p1, move)
 
   return ret
 end
-Chess_King_Move.GetTargetArea = Chess_King_Move.GetTargetAreaExt
 
 --- Move if a line, leap otherwise
 function Chess_King_Move:GetSkillEffectExt(p1, p2, ret)
@@ -81,7 +82,6 @@ function Chess_King_Move:GetSkillEffectExt(p1, p2, ret)
   diagonal.lineMoveSkillEffect(ret, p1, p2)
   return ret
 end
-Chess_King_Move.GetSkillEffect = Chess_King_Move.GetSkillEffectExt
 
 --[[--
   Spawn Pawn: Spawns up to 2 pawns to do the king's fighting

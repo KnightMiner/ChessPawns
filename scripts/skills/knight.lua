@@ -2,6 +2,7 @@ local mod = mod_loader.mods[modApi.currentMod]
 local config = mod.config
 local achvTrigger = mod:loadScript("achievementTriggers")
 local helpers = mod:loadScript("libs/helpers")
+local pawnMove = mod:loadScript("libs/pawnMoveSkill")
 local previewer = mod:loadScript("weaponPreview/api")
 local saveData = mod:loadScript("libs/saveData")
 local tips = mod:loadScript("libs/tutorialTips")
@@ -145,7 +146,7 @@ end
 --[[--
   Knight Move: 2 spaces in one direction, then 1 space on the other axis
 ]]
-Chess_Knight_Move = Skill:new {
+Chess_Knight_Move = pawnMove.ExtendDefaultMove{
   IsAttack = false
 }
 
@@ -231,7 +232,6 @@ function Chess_Knight_Move:GetTargetAreaExt(p1, move)
 
   return ret
 end
-Chess_Knight_Move.GetTargetArea = Chess_Knight_Move.GetTargetAreaExt
 
 --[[--
   Divides a point elementwise by the given number, flooring any remainder
@@ -247,7 +247,6 @@ end
 --- Knight makes leaping movements. Will make multiple leaps if over 3 tiles
 function Chess_Knight_Move:GetSkillEffectExt(p1, p2, ret)
   local ret = ret or SkillEffect()
-  TESTING = ret
 
   -- if the movement is too far, add a middle move
   local middle = p1
@@ -274,10 +273,6 @@ function Chess_Knight_Move:GetSkillEffectExt(p1, p2, ret)
   helpers.addLeap(ret, middle, p2)
 
   return ret
-end
---- Needed to override rather than copy function as somehow Skill gets passed as the third argument here
-function Chess_Knight_Move:GetSkillEffect(p1, p2)
-  return self:GetSkillEffectExt(p1, p2)
 end
 
 --[[--

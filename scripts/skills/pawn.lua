@@ -2,6 +2,7 @@ local mod = mod_loader.mods[modApi.currentMod]
 local achvTrigger = mod:loadScript("achievementTriggers")
 local diagonal = mod:loadScript("libs/diagonalMove")
 local helpers = mod:loadScript("libs/helpers")
+local pawnMove = mod:loadScript("libs/pawnMoveSkill")
 local previewer = mod:loadScript("weaponPreview/api")
 local trait = mod:loadScript("libs/trait")
 
@@ -30,17 +31,11 @@ trait:Add{
 
   Upgrades: Alternates distance and diagonal
 ]]
-Chess_Pawn_Move = {}
+Chess_Pawn_Move = pawnMove.ExtendDefaultMove()
+
 function Chess_Pawn_Move:GetTargetArea(p1)
   -- diagonal has a lovely function to check for moves in a straight line, might as well use instead of reimplementing
   return diagonal.getDiagonalMoves(p1, 0, Pawn:GetMoveSpeed())
-end
-
-function Chess_Pawn_Move:GetSkillEffect(p1, p2)
-	local ret = SkillEffect()
-	ret:AddMove(Board:GetPath(p1, p2, Pawn:GetPathProf()), FULL_DELAY)
-
-	return ret
 end
 
 --[[--
