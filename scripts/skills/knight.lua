@@ -68,10 +68,6 @@ local function getHealthEquivelent(pawn, useMax)
   elseif pawn:IsArmor() then
     health = health + 1
   end
-  -- ice boosts damage by 1
-  if pawn:IsFrozen() then
-    health = health + 1
-  end
 
   return health
 end
@@ -122,15 +118,19 @@ local function pointValid(point, isAttack, maxDamage)
     return true
   end
 
-  -- no attacking pawns with a corpse (false for mechs oddly, so check that too)
-  if pawnAtPoint:IsMech() or _G[pawnAtPoint:GetType()]:GetCorpse() then
+  -- no attacking pawns with a corpse
+  if pawnAtPoint:IsCorpse() then
     previewer:AddDesc(point, "knight_corpse")
     return false
   end
 
-  -- no attacking shielded enemies, that takes 2 hits
+  -- no attacking shielded or frozen enemies, that takes 2 hits
   if pawnAtPoint:IsShield() then
     previewer:AddDesc(point, "knight_shielded")
+    return false
+  end
+  if pawnAtPoint:IsFrozen() then
+    previewer:AddDesc(point, "knight_frozen")
     return false
   end
 
