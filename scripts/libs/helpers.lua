@@ -23,6 +23,7 @@ end
 function helpers.animationDamage(point, name)
   local damage = SpaceDamage(point, 0)
   damage.sAnimation = name
+  damage.bHide = true
   return damage
 end
 

@@ -174,9 +174,6 @@ function Chess_Knight_Move:GetTargetAreaExt(p1, move)
   local maxDamage = 0
   if self.IsAttack then
     maxDamage = getHealthEquivelent(Pawn, config.knightCapMax or Pawn:IsShield()) + self.LessSelfDamage
-    if Pawn:IsBoosted() then
-      maxDamage = maxDamage + 1
-    end
     previewer:AddDesc(p1, "knight_max_" .. maxDamage)
   end
 
@@ -366,33 +363,56 @@ end
 function Chess_Knight_Smite:GetSkillEffect(p1, p2)
   local ret = SkillEffect()
 
+  -- crack on boost
+  local addCrackPreview = false
+  if Pawn:IsBoosted() then
+    addCrackPreview = true
+    local crackDamage = SpaceDamage(p1, 0)
+    crackDamage.iCrack = EFFECT_CREATE
+    crackDamage.bHide = true -- does not show properly in the preview when we crack before leap
+    ret:AddDamage(crackDamage)
+  end
+
+  -- move mech
+  helpers.addLeap(ret, p1, p2)
+
   -- attack target if available
   local target = Board:GetPawn(p2)
-  if target ~= nil and target:GetSpace() ~= Pawn:GetSpace() then
+  if target ~= nil and p2 ~= Pawn:GetSpace() then
     -- deal damage based on targets health
     local selfDamage = getHealthEquivelent(target) - self.LessSelfDamage
-    if Pawn:IsBoosted() then
-      selfDamage = selfDamage - 1
+
+    -- add damage for display at self, skip at target as that makes the preview show the mech dying
+    if selfDamage > 0 then
+      local selfDamage = SpaceDamage(p1, selfDamage)
+      if Pawn:IsBoosted() then
+        selfDamage.iCrack = EFFECT_CREATE
+      end
+      previewer:AddDamage(selfDamage)
+      addCrackPreview = false -- including in self damage here
     end
-
-    -- move mech
-    helpers.addLeap(ret, p1, p2)
-
-    -- add damage for display at both locations
-    previewer:AddDamage(SpaceDamage(p1, selfDamage))
-    --previewer:AddDamage(SpaceDamage(p2, DAMAGE_DEATH))
 
     -- run kill script
     ret:AddScript("Chess_Knight_Smite:Squash("..p2:GetString()..","..selfDamage..")")
-  elseif Board:GetTerrain(p2) == TERRAIN_MOUNTAIN then
-    -- move mech
-    helpers.addLeap(ret, p1, p2)
-
-    -- attack mountain and mech
-    ret:AddDamage(SpaceDamage(p2, 1))
   else
-    -- just normal leap if no enemy
-    helpers.addLeap(ret, p1, p2)
+    if Board:GetTerrain(p2) == TERRAIN_MOUNTAIN then
+      -- attack mountain and mech
+      ret:AddDamage(SpaceDamage(p2, 1))
+    end
+  end
+
+  -- if I want cracking to show in the tooltip, I must crack after the leap
+  if addCrackPreview then
+    local crackDamage = SpaceDamage(p1, 0)
+    crackDamage.iCrack = EFFECT_CREATE
+    -- the annoying part is I can only use the previewer to crack if I also include damage in the previewer
+    -- if I want cracking to show in the tooltip I must either crack after leaping outside of preview (looks dumb) or crack after leaping with damage in preview (wrong here)
+    -- to work around this, I simply crack the tile twice. however this means if I leap from an ice tile it will fully break the ice tile
+    -- setting the terrain to ice works around this
+    if Board:GetTerrain(p1) == TERRAIN_ICE and Board:GetHealth(p1) == 2 then
+      crackDamage.iTerrain = TERRAIN_ICE
+    end
+    ret:AddDamage(crackDamage)
   end
 
   -- bounce a bit on landing
