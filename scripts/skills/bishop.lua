@@ -27,6 +27,7 @@ tips:Add{
   Upgrade: Move extra spaces orthogonally
 ]]
 Chess_Bishop_Move = Chess_Rook_Move:new{}
+
 --[[--
   This function is a safer version of GetTargetArea as the weaponPreview lib injects code into all GetTargetArea functions
   Designed to be called externally by mods with custom movement skills
@@ -40,21 +41,9 @@ function Chess_Bishop_Move:GetTargetAreaExt(p1, move)
     tips:Trigger("Bishop_Move", p1)
   end
   local move = move or Pawn:GetMoveSpeed()
-  local diagSpeed, orthoSpeed
-  if move > 4 then
-    -- from 5 to 8, get full 7 ortho speed
-    -- +2 diagonal per move above 4 (so max speed at 8)
-    diagSpeed = 7
-    orthoSpeed = 2 * (move - 4)
-  else
-    -- each speed is +2 ortho movement, with the exception of the first which grants 1
-    -- no diagonal speed at all
-    diagSpeed = math.max(2 * move - 1, 0)
-    orthoSpeed = 0
-  end
+  local orthoSpeed, diagSpeed = self:SplitMoveSpeed(move or Pawn:GetMoveSpeed())
   return diagonal.getDiagonalMoves(p1, diagSpeed, orthoSpeed)
 end
-Chess_Bishop_Move.GetTargetArea = Chess_Bishop_Move.GetTargetAreaExt
 
 
 --- CauldronPilots compatibility: allow leaping diagnally
@@ -62,10 +51,11 @@ function Chess_Bishop_Move:CricketTargetArea(p1)
   -- start with defaukt move
   local ret = self:GetTargetAreaExt(p1)
   local defaultSpaces = extract_table(ret)
+  local orthoSpeed, diagSpeed = self:SplitMoveSpeed(Pawn:GetMoveSpeed())
   -- add any bonus spaces diagonally in each direction
   for dir = DIR_START, DIR_END do
     local offset = DIR_VECTORS[dir] + DIR_VECTORS[(dir+1)%4]
-    for i = 1, Pawn:GetMoveSpeed() do
+    for i = 1, diagSpeed do
       local point = p1 + offset*i
       -- if this point is invalid, all later points will also be invalid
       if not Board:IsValid(point) then break end

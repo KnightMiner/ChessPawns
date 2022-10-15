@@ -207,19 +207,8 @@ end
 ]]
 Chess_Rook_Move = pawnMove.ExtendDefaultMove()
 
---[[--
-  This function is a safer version of GetTargetArea as the weaponPreview lib injects code into all GetTargetArea functions
-  Designed to be called externally by mods with custom movement skills
-
-  @param p1    Pawn location
-  @param move  Pawn move speed, defaults to Pawn:GetMoveSpeed()
-  @return  Target area for this function
-]]
-function Chess_Rook_Move:GetTargetAreaExt(p1, move)
-  if not IsTestMechScenario() then
-    tips:Trigger("Rook_Move", p1)
-  end
-  local move = move or Pawn:GetMoveSpeed()
+-- gets the rook diag and ortho speed based on the input move speed
+function Chess_Rook_Move:SplitMoveSpeed(move)
   local diagSpeed, orthoSpeed
   if move > 4 then
     -- from 5 to 8, get full 7 ortho speed
@@ -232,6 +221,22 @@ function Chess_Rook_Move:GetTargetAreaExt(p1, move)
     orthoSpeed = math.max(2 * move - 1, 0)
     diagSpeed = 0
   end
+  return diagSpeed, orthoSpeed
+end
+
+--[[--
+  This function is a safer version of GetTargetArea as the weaponPreview lib injects code into all GetTargetArea functions
+  Designed to be called externally by mods with custom movement skills
+
+  @param p1    Pawn location
+  @param move  Pawn move speed, defaults to Pawn:GetMoveSpeed()
+  @return  Target area for this function
+]]
+function Chess_Rook_Move:GetTargetAreaExt(p1, move)
+  if not IsTestMechScenario() then
+    tips:Trigger("Rook_Move", p1)
+  end
+  local diagSpeed, orthoSpeed = self:SplitMoveSpeed(move or Pawn:GetMoveSpeed())
   return diagonal.getDiagonalMoves(p1, diagSpeed, orthoSpeed)
 end
 
@@ -247,6 +252,28 @@ end
 function Chess_Rook_Move:GetSkillEffectExt(p1, p2, ret)
   local ret = ret or SkillEffect()
   diagonal.lineMoveSkillEffect(ret, p1, p2)
+  return ret
+end
+
+--- CauldronPilots compatibility: bonus spaces from CricketSkill
+function Chess_Rook_Move:CricketTargetArea(p1)
+  local ret = self:GetTargetAreaExt(p1)
+  local defaultSpaces = extract_table(ret)
+  local diagSpeed, orthoSpeed = self:SplitMoveSpeed(Pawn:GetMoveSpeed())
+  -- add any bonus spaces diagonally in each direction
+  for dir = DIR_START, DIR_END do
+    local offset = DIR_VECTORS[dir]
+    for i = 1, orthoSpeed do
+      local point = p1 + offset*i
+      -- if this point is invalid, all later points will also be invalid
+      if not Board:IsValid(point) then break end
+			-- point must be somewhere they can land and not already included
+      if not Board:IsBlocked(point, Pawn:GetPathProf()) and not list_contains(defaultSpaces, point) then
+        ret:push_back(point)
+      end
+    end
+  end
+
   return ret
 end
 
